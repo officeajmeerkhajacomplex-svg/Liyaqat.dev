@@ -21,6 +21,7 @@ import { playSound } from '../lib/sounds';
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Home' },
   { path: '/chat', icon: MessageSquare, label: 'Ask AI' },
+  { path: '/qibla', icon: Compass, label: 'Qibla' },
   { path: '/tasbeeh', icon: List, label: 'Tasbeeh' },
   { path: '/masjids', icon: MapPin, label: 'Masjids' },
   { path: '/quran', icon: BookOpen, label: 'Quran' },
