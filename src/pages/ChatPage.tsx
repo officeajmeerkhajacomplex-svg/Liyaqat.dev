@@ -11,7 +11,8 @@ import {
   Sparkles,
   ArrowLeft,
   Share2,
-  Shield
+  Shield,
+  List
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { 
@@ -43,6 +44,15 @@ export default function ChatPage() {
   const [chats, setChats] = useState<any[]>([]);
   const [isNewChat, setIsNewChat] = useState(!chatId);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -153,48 +163,59 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-140px)] md:h-[calc(100vh-100px)] flex flex-col md:flex-row gap-6 relative">
-      {/* Sidebar - Desktop Chat History */}
-      <div className="hidden md:flex w-72 flex-col bg-white dark:bg-zinc-900 rounded-[2rem] border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm">
-        <div className="p-6">
-          <button 
-            onClick={() => { navigate('/chat'); playSound('click'); }}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-emerald text-white rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-lg shadow-emerald-500/10"
-          >
-            <Plus className="w-5 h-5" />
-            <span>New Chat</span>
-          </button>
-        </div>
-
-        <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
-          {chats.map(chat => (
-            <div
-              key={chat.id}
-              onClick={() => navigate(`/chat/${chat.id}`)}
-              className={cn(
-                "group flex items-center justify-between p-3 rounded-xl cursor-not-allowed cursor-pointer transition-all",
-                chatId === chat.id 
-                  ? "bg-brand-emerald/10 text-brand-emerald" 
-                  : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
-              )}
+    <div className="h-full flex flex-col md:flex-row gap-6 relative">
+      {/* Sidebar - Desktop & Mobile Chat History */}
+      <div className={cn(
+        "fixed inset-0 z-[100] md:z-0 md:relative md:inset-auto md:flex w-full md:w-72 flex-col bg-slate-900/40 backdrop-blur-sm md:bg-transparent md:backdrop-blur-none transition-opacity duration-300",
+        isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto"
+      )} onClick={() => setIsSidebarOpen(false)}>
+        <motion.div 
+          initial={false}
+          animate={{ x: isSidebarOpen || !isMobile ? 0 : -300 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+          className="w-72 h-full flex flex-col bg-white dark:bg-zinc-900 border-r border-slate-200 dark:border-zinc-800 shadow-xl md:shadow-sm md:rounded-[2rem] md:border md:x-0"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-6">
+            <button 
+              onClick={() => { navigate('/chat'); setIsSidebarOpen(false); playSound('click'); }}
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-emerald text-white rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-lg shadow-emerald-500/10"
             >
-              <div className="flex items-center gap-3 min-w-0">
-                <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                <span className="text-sm font-medium truncate">{chat.title}</span>
-              </div>
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setDeleteConfirmId(chat.id);
-                }}
-                className="p-1 hover:text-red-500 transition-all text-slate-300 dark:text-zinc-600 hover:dark:text-red-400 opacity-0 group-hover:opacity-100"
-                title="Delete Chat"
+              <Plus className="w-5 h-5" />
+              <span>New Chat</span>
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+            {chats.map(chat => (
+              <div
+                key={chat.id}
+                onClick={() => { navigate(`/chat/${chat.id}`); setIsSidebarOpen(false); }}
+                className={cn(
+                  "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all",
+                  chatId === chat.id 
+                    ? "bg-brand-emerald/10 text-brand-emerald" 
+                    : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
+                )}
               >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
-          ))}
-        </div>
+                <div className="flex items-center gap-3 min-w-0">
+                  <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                  <span className="text-sm font-medium truncate">{chat.title}</span>
+                </div>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteConfirmId(chat.id);
+                  }}
+                  className="p-1 hover:text-red-500 transition-all text-slate-300 dark:text-zinc-600 hover:dark:text-red-400 opacity-0 group-hover:opacity-100"
+                  title="Delete Chat"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
 
       {/* Main Chat Area */}
@@ -203,11 +224,19 @@ export default function ChatPage() {
         <div className="p-4 border-b border-slate-100 dark:border-zinc-800/50 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={() => setIsSidebarOpen(true)}
               className="md:hidden p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg"
             >
-              <ArrowLeft className="w-5 h-5 dark:text-white" />
+              <List className="w-5 h-5 dark:text-white" />
             </button>
+            <div className="hidden md:block">
+              <button 
+                onClick={() => navigate('/dashboard')}
+                className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg"
+              >
+                <ArrowLeft className="w-5 h-5 dark:text-white" />
+              </button>
+            </div>
             <div>
               <h2 className="font-bold dark:text-white flex items-center gap-2">
                 DeenFlow AI

@@ -8,21 +8,39 @@ import {
   ChevronRight,
   Heart,
   Bookmark,
-  Library
+  Library,
+  User,
+  Star,
+  Compass,
+  Flower,
+  Zap,
+  Cloud,
+  Music,
+  Moon,
+  Sun,
+  Calendar
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { format, differenceInSeconds, parse, isAfter, addDays } from 'date-fns';
+import UpcomingIslamicDaysWidget from '../components/UpcomingIslamicDaysWidget';
+
+const AVATAR_ICONS = {
+  User, Star, Heart, Compass, Flower, Zap, Cloud, Music, Moon, Sun
+};
 
 export default function Dashboard() {
   const { profile } = useAuthStore();
+  const navigate = useNavigate();
   const [verse, setVerse] = useState<any>(null);
   const [prayerTimes, setPrayerTimes] = useState<any>(null);
   const [hijriDate, setHijriDate] = useState<string>('');
   const [loadingVerse, setLoadingVerse] = useState(true);
   const [nextPrayer, setNextPrayer] = useState<any>(null);
   const [currentPrayer, setCurrentPrayer] = useState<string>('');
+
+  const IconComponent = (AVATAR_ICONS as any)[profile?.avatarIcon || 'User'] || User;
 
   useEffect(() => {
     // Fetch Random Verse
@@ -115,16 +133,34 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Header / Greeting */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold dark:text-white">
-            As-salamu alaykum, <span className="text-brand-emerald">{profile?.displayName?.split(' ')[0] || 'Seeker'}</span>
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium">May your day be filled with barakah.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-slate-200/50 dark:border-zinc-800/50">
+        <div className="flex items-center gap-5">
+           <Link to="/profile" className="relative group">
+              <div 
+                style={{ backgroundColor: profile?.avatarColor || '#10B981' }}
+                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/10 group-hover:scale-105 transition-transform"
+              >
+                <IconComponent size={28} />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-brand-gold text-white rounded-lg border-2 border-slate-50 dark:border-brand-black flex items-center justify-center shadow-md">
+                <Heart size={10} className="fill-current" />
+              </div>
+           </Link>
+           <div>
+              <h1 className="text-3xl font-bold dark:text-white leading-tight">
+                As-salamu alaykum, <span className="text-brand-emerald">{profile?.displayName?.split(' ')[0] || 'Seeker'}</span>
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">May your day be filled with barakah.</p>
+           </div>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm">
-          <Clock className="w-4 h-4 text-brand-gold" />
-          <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{hijriDate || 'Loading...'}</span>
+        <div className="flex items-center gap-3 self-start md:self-center">
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm">
+            <Clock className="w-4 h-4 text-brand-gold" />
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{hijriDate || 'Loading...'}</span>
+          </div>
+          <Link to="/profile" className="p-2.5 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm md:hidden">
+            <User className="w-5 h-5 text-slate-500" />
+          </Link>
         </div>
       </div>
 
@@ -240,7 +276,10 @@ export default function Dashboard() {
               <Heart className="w-8 h-8 text-brand-gold fill-current opacity-20" />
             </div>
           </motion.div>
-
+          
+          {/* Upcoming Islamic Days Widget */}
+          <UpcomingIslamicDaysWidget />
+          
           {/* Daily Reminder */}
           <div className="p-6 bg-slate-900 text-white rounded-[2rem] relative overflow-hidden">
             <div className="relative z-10">

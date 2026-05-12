@@ -5,13 +5,17 @@ import {
   signOut as firebaseSignOut
 } from 'firebase/auth';
 import { auth, db } from '../firebase/config';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 interface UserProfile {
   uid: string;
   email: string;
   displayName: string | null;
   photoURL: string | null;
+  avatarIcon?: string;
+  avatarColor?: string;
+  notificationsEnabled?: boolean;
+  bio?: string;
 }
 
 interface AuthState {
@@ -38,14 +42,30 @@ export const useAuthStore = create<AuthState>((set) => ({
           const newProfile = {
             uid: user.uid,
             email: user.email!,
-            displayName: user.displayName,
+            displayName: user.displayName || 'Seeker',
             photoURL: user.photoURL,
+            avatarIcon: 'User',
+            avatarColor: '#10B981',
+            notificationsEnabled: true,
+            bio: '',
             createdAt: serverTimestamp(),
           };
           await setDoc(doc(db, 'users', user.uid), newProfile);
           set({ user, profile: newProfile as any, loading: false, initialized: true });
         } else {
-          set({ user, profile: userDoc.data() as UserProfile, loading: false, initialized: true });
+          const profileData = userDoc.data() as UserProfile;
+          if (!profileData.avatarIcon || !profileData.avatarColor || profileData.notificationsEnabled === undefined) {
+            const updates = {
+              avatarIcon: profileData.avatarIcon || 'User',
+              avatarColor: profileData.avatarColor || '#10B981',
+              notificationsEnabled: profileData.notificationsEnabled ?? true,
+              bio: profileData.bio ?? '',
+            };
+            await updateDoc(doc(db, 'users', user.uid), updates);
+            set({ user, profile: { ...profileData, ...updates }, loading: false, initialized: true });
+          } else {
+            set({ user, profile: profileData, loading: false, initialized: true });
+          }
         }
       } else {
         set({ user: null, profile: null, loading: false, initialized: true });

@@ -61,6 +61,14 @@ service cloud.firestore {
              data.createdAt == request.time;
     }
 
+    function isValidTasbeeh(data) {
+      return data.keys().hasAll(['userId', 'count', 'label', 'timestamp']) &&
+             data.userId == request.auth.uid &&
+             data.count is number &&
+             data.label is string && data.label.size() <= 100 &&
+             data.timestamp == request.time;
+    }
+
     // --- Collections ---
 
     match /test/connection {
@@ -93,6 +101,11 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidBookmark(incoming());
         allow delete: if isOwner(userId);
+      }
+
+      match /tasbeeh_history/{historyId} {
+        allow list: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTasbeeh(incoming());
       }
     }
   }

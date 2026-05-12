@@ -133,8 +133,8 @@ export default function AuthPage() {
       <div className="flex flex-col items-center justify-center p-6 md:p-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-10">
-            <div className="w-16 h-16 bg-brand-emerald rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10">
-              <span className="text-white font-bold text-3xl font-serif">D</span>
+            <div className="w-16 h-16 overflow-hidden mx-auto mb-6">
+              <img src="/favicon.svg" alt="DeenFlow Logo" className="w-full h-full object-contain" />
             </div>
             <h1 className="text-3xl font-bold mb-2">
               {isLogin ? 'Welcome Back' : 'Join DeenFlow'}

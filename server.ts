@@ -32,9 +32,9 @@ Guidelines:
 
   app.post("/api/chat", async (req, res) => {
     try {
-      const apiKey = (process.env.DeenFlow || process.env.GEMINI_API_KEY)?.trim();
+      const apiKey = process.env.GEMINI_API_KEY?.trim();
       if (!apiKey) {
-        return res.status(500).json({ error: "DeenFlow API key is missing. Please check your Secrets in Settings." });
+        return res.status(500).json({ error: "Gemini API key is missing. Please check your Secrets in Settings." });
       }
 
       const { history, message } = req.body;

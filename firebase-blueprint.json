@@ -54,6 +54,19 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "surahNumber", "ayahNumber", "createdAt"]
+    },
+    "TasbeehSession": {
+      "title": "Tasbeeh Session",
+      "description": "Record of a completed Dhikr session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "count": { "type": "number" },
+        "label": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "count", "label", "timestamp"]
     }
   },
   "firestore": {
@@ -72,6 +85,10 @@
     "/users/{userId}/bookmarks/{bookmarkId}": {
       "schema": "Bookmark",
       "description": "User's bookmarked ayahs"
+    },
+    "/users/{userId}/tasbeeh_history/{historyId}": {
+      "schema": "TasbeehSession",
+      "description": "User's completed Dhikr sessions"
     }
   }
 }

@@ -20,6 +20,8 @@ import QiblaPage from './pages/QiblaPage';
 import ProfilePage from './pages/ProfilePage';
 import CollectionsPage from './pages/CollectionsPage';
 import CollectionDetailPage from './pages/CollectionDetailPage';
+import TasbeehPage from './pages/TasbeehPage';
+import MasjidFinderPage from './pages/MasjidFinderPage';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -66,6 +68,8 @@ export default function App() {
           <Route path="profile" element={<ProfilePage />} />
           <Route path="collections" element={<CollectionsPage />} />
           <Route path="collections/:id" element={<CollectionDetailPage />} />
+          <Route path="tasbeeh" element={<TasbeehPage />} />
+          <Route path="masjids" element={<MasjidFinderPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

@@ -98,7 +98,7 @@ export default function SurahPage() {
   return (
     <div className="max-w-4xl mx-auto pb-20">
       {/* Header Sticky */}
-      <div className="sticky top-0 z-40 bg-zinc-50/80 dark:bg-brand-black/80 backdrop-blur-md py-4 mb-8">
+      <div className="sticky top-0 z-40 bg-slate-50/80 dark:bg-zinc-950/80 backdrop-blur-md py-4 mb-4 md:mb-8">
         <div className="flex items-center justify-between">
           <button 
             onClick={() => navigate('/quran')}
@@ -129,13 +129,13 @@ export default function SurahPage() {
       </div>
 
       {/* Surah Header Banner */}
-      <div className="p-10 bg-brand-emerald text-white rounded-[3rem] text-center mb-12 relative overflow-hidden shadow-2xl shadow-emerald-500/10">
+      <div className="p-6 md:p-10 bg-brand-emerald text-white rounded-[2.5rem] md:rounded-[3rem] text-center mb-8 md:mb-12 relative overflow-hidden shadow-2xl shadow-emerald-500/10">
         <div className="absolute inset-0 opacity-10 pointer-events-none">
           <BookOpen className="w-full h-full scale-[3]" />
         </div>
         <div className="relative z-10">
-          <p className="text-5xl font-arabic mb-6">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
-          <p className="text-sm font-serif italic text-emerald-100 italic">In the name of Allah, the Entirely Merciful, the Especially Merciful.</p>
+          <p className="text-3xl md:text-5xl font-arabic mb-4 md:mb-6">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</p>
+          <p className="text-xs md:text-sm font-serif italic text-emerald-100 italic">In the name of Allah, the Entirely Merciful, the Especially Merciful.</p>
         </div>
       </div>
 
@@ -155,7 +155,7 @@ export default function SurahPage() {
                 {ayah.numberInSurah}
               </div>
               <div className="h-[1px] flex-1 bg-slate-100 dark:bg-zinc-800" />
-              <div className="flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-3 md:opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={() => toggleBookmark(ayah, index)}
                   className={cn(
@@ -163,13 +163,13 @@ export default function SurahPage() {
                     bookmarks.has(ayah.numberInSurah) ? "text-brand-gold" : "text-slate-400 hover:text-brand-emerald"
                   )}
                 >
-                  <Bookmark className={cn("w-5 h-5", bookmarks.has(ayah.numberInSurah) && "fill-current")} />
+                  <Bookmark className={cn("w-4 h-4 md:w-5 md:h-5", bookmarks.has(ayah.numberInSurah) && "fill-current")} />
                 </button>
                 <button className="p-2 text-slate-400 hover:text-brand-emerald transition-colors">
-                  <Play className="w-5 h-5" />
+                  <Play className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
                 <button className="p-2 text-slate-400 hover:text-brand-emerald transition-colors">
-                  <Share2 className="w-5 h-5" />
+                  <Share2 className="w-4 h-4 md:w-5 md:h-5" />
                 </button>
               </div>
             </div>
