@@ -18,6 +18,8 @@ import SurahPage from './pages/SurahPage';
 import PrayerTimesPage from './pages/PrayerTimesPage';
 import QiblaPage from './pages/QiblaPage';
 import ProfilePage from './pages/ProfilePage';
+import CollectionsPage from './pages/CollectionsPage';
+import CollectionDetailPage from './pages/CollectionDetailPage';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -36,16 +38,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   const { initialize } = useAuthStore();
-  const { theme } = useThemeStore();
+  const { initTheme } = useThemeStore();
 
   useEffect(() => {
     initialize();
-    // Apply theme on mount
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    initTheme();
   }, []);
 
   return (
@@ -67,6 +64,8 @@ export default function App() {
           <Route path="prayer-times" element={<PrayerTimesPage />} />
           <Route path="qibla" element={<QiblaPage />} />
           <Route path="profile" element={<ProfilePage />} />
+          <Route path="collections" element={<CollectionsPage />} />
+          <Route path="collections/:id" element={<CollectionDetailPage />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" />} />

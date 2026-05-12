@@ -30,6 +30,7 @@ import { db, handleFirestoreError, OperationType } from '../firebase/config';
 import { useAuthStore } from '../store/useAuthStore';
 import { getChatResponse } from '../services/geminiService';
 import { cn } from '../lib/utils';
+import { playSound } from '../lib/sounds';
 
 export default function ChatPage() {
   const { chatId } = useParams();
@@ -89,6 +90,7 @@ export default function ChatPage() {
 
     const userMessage = input.trim();
     setInput('');
+    playSound('message');
     try {
       let currentChatId = chatId;
 
@@ -127,6 +129,7 @@ export default function ChatPage() {
         content: aiResponse || "I am sorry, I couldn't generate a response. Please try again.",
         createdAt: serverTimestamp(),
       });
+      playSound('tap');
 
     } catch (err) {
       console.error(err);
@@ -155,7 +158,7 @@ export default function ChatPage() {
       <div className="hidden md:flex w-72 flex-col bg-white dark:bg-zinc-900 rounded-[2rem] border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm">
         <div className="p-6">
           <button 
-            onClick={() => navigate('/chat')}
+            onClick={() => { navigate('/chat'); playSound('click'); }}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-brand-emerald text-white rounded-xl font-bold hover:scale-[1.02] transition-transform shadow-lg shadow-emerald-500/10"
           >
             <Plus className="w-5 h-5" />

@@ -4,6 +4,7 @@ interface ThemeState {
   theme: 'light' | 'dark';
   toggleTheme: () => void;
   setTheme: (theme: 'light' | 'dark') => void;
+  initTheme: () => void;
 }
 
 export const useThemeStore = create<ThemeState>((set) => ({
@@ -36,5 +37,6 @@ export const useThemeStore = create<ThemeState>((set) => ({
     } else {
       document.documentElement.classList.remove('dark');
     }
+    set({ theme });
   }
 }));

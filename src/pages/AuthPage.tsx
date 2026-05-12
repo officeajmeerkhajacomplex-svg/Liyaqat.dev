@@ -7,7 +7,8 @@ import {
   Eye, 
   EyeOff, 
   ArrowLeft,
-  Loader2
+  Loader2,
+  User as UserIcon
 } from 'lucide-react';
 import { 
   signInWithEmailAndPassword, 
@@ -16,9 +17,11 @@ import {
   signInWithPopup,
   GoogleAuthProvider
 } from 'firebase/auth';
-import { auth } from '../firebase/config';
+import { auth, db } from '../firebase/config';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuthStore } from '../store/useAuthStore';
 import { cn } from '../lib/utils';
+import { playSound } from '../lib/sounds';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,7 +33,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
-  const { user } = useAuthStore();
+  const { user, setProfile } = useAuthStore();
   const navigate = useNavigate();
 
   if (user) return <Navigate to="/dashboard" />;
@@ -38,9 +41,11 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
+    playSound('tap');
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      playSound('success');
       navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
@@ -58,16 +63,31 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    playSound('click');
 
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
         if (name) {
-          await updateProfile(userCredential.user, { displayName: name });
+          await updateProfile(user, { displayName: name });
         }
+
+        // Manually create the Firestore profile to ensure the username is saved correctly immediately
+        const newProfile = {
+          uid: user.uid,
+          email: user.email!,
+          displayName: name || user.displayName || 'Seeker',
+          photoURL: user.photoURL,
+          createdAt: serverTimestamp(),
+        };
+        await setDoc(doc(db, 'users', user.uid), newProfile);
+        setProfile(newProfile as any);
       }
+      playSound('success');
       navigate('/dashboard');
     } catch (err: any) {
       console.error(err);
@@ -91,7 +111,7 @@ export default function AuthPage() {
           </svg>
         </div>
         
-        <Link to="/" className="flex items-center gap-2 relative z-10">
+        <Link to="/" onClick={() => playSound('tap')} className="flex items-center gap-2 relative z-10">
           <ArrowLeft className="w-5 h-5" />
           <span className="font-semibold">Back to Home</span>
         </Link>
@@ -168,18 +188,20 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Full Name</label>
+                <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Choose Username</label>
                 <div className="relative">
                   <input
                     type="text"
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="Abdur Rahman"
+                    placeholder="DeenSeeker"
                     className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium"
                   />
-                  <Loader2 className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400", loading ? "animate-spin" : "hidden")} />
-                  {!loading && <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />}
+                  <div className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400", !loading && "hidden")}>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  </div>
+                  {!loading && <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />}
                 </div>
               </div>
             )}

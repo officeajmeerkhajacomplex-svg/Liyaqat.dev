@@ -9,6 +9,7 @@ import {
   Heart
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { playSound } from '../lib/sounds';
 
 export default function LandingPage() {
   const { user } = useAuthStore();
@@ -63,12 +64,14 @@ export default function LandingPage() {
           >
             <Link
               to={user ? "/dashboard" : "/auth"}
+              onClick={() => playSound('tap')}
               className="w-full sm:w-auto px-8 py-4 bg-brand-emerald text-white rounded-2xl font-bold shadow-xl shadow-emerald-500/20 hover:scale-[1.02] transition-transform flex items-center justify-center gap-2"
             >
               Get Started Free <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               to="/auth"
+              onClick={() => playSound('tap')}
               className="w-full sm:w-auto px-8 py-4 bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white rounded-2xl font-bold hover:bg-slate-200 dark:hover:bg-zinc-700 transition-colors"
             >
               Sign In

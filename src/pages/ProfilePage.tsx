@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   User, 
   Mail, 
@@ -12,20 +12,34 @@ import {
   Shield,
   Bell,
   Heart,
-  Loader2
+  Loader2,
+  Edit2,
+  Check,
+  X
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { cn } from '../lib/utils';
-import { collection, query, getDocs, where } from 'firebase/firestore';
-import { db } from '../firebase/config';
+import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { db, auth } from '../firebase/config';
+import { updateProfile as firebaseUpdateProfile } from 'firebase/auth';
+import { playSound } from '../lib/sounds';
 
 export default function ProfilePage() {
-  const { profile, signOut } = useAuthStore();
+  const { profile, signOut, setProfile } = useAuthStore();
   const { theme, toggleTheme } = useThemeStore();
   
   const [stats, setStats] = useState({ chats: 0, bookmarks: 0 });
   const [loading, setLoading] = useState(true);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [savingName, setSavingName] = useState(false);
+
+  useEffect(() => {
+    if (profile?.displayName) {
+      setNewName(profile.displayName);
+    }
+  }, [profile]);
 
   useEffect(() => {
     if (!profile) return;
@@ -54,6 +68,35 @@ export default function ProfilePage() {
     fetchStats();
   }, [profile]);
 
+  const handleUpdateName = async () => {
+    if (!profile || !newName.trim() || newName === profile.displayName) {
+      setIsEditingName(false);
+      return;
+    }
+
+    setSavingName(true);
+    try {
+      if (auth.currentUser) {
+        await firebaseUpdateProfile(auth.currentUser, { displayName: newName });
+      }
+      await updateDoc(doc(db, 'users', profile.uid), {
+        displayName: newName
+      });
+      setProfile({ ...profile, displayName: newName });
+      setIsEditingName(false);
+      playSound('success');
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSavingName(false);
+    }
+  };
+
+  const onToggleTheme = () => {
+    toggleTheme();
+    playSound('tap');
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       {/* Profile Header */}
@@ -66,10 +109,51 @@ export default function ProfilePage() {
             <Heart className="w-4 h-4 fill-current" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold dark:text-white uppercase tracking-tight">{profile?.displayName || 'Seeker'}</h1>
-        <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">
-          <Mail className="w-4 h-4" />
-          <span>{profile?.email}</span>
+        
+        <div className="flex flex-col items-center gap-1">
+          <div className="flex items-center gap-2">
+            {isEditingName ? (
+              <div className="flex items-center gap-2 bg-slate-100 dark:bg-zinc-800 p-1 pl-4 rounded-full border border-slate-200 dark:border-zinc-700">
+                <input 
+                  type="text"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  autoFocus
+                  className="bg-transparent border-none focus:ring-0 text-lg font-bold dark:text-white w-40"
+                  onKeyDown={(e) => e.key === 'Enter' && handleUpdateName()}
+                />
+                <div className="flex gap-1">
+                  <button 
+                    onClick={handleUpdateName}
+                    disabled={savingName}
+                    className="p-2 bg-brand-emerald text-white rounded-full hover:scale-105 transition-transform disabled:opacity-50"
+                  >
+                    {savingName ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  </button>
+                  <button 
+                    onClick={() => { setIsEditingName(false); setNewName(profile?.displayName || ''); }}
+                    className="p-2 bg-white dark:bg-zinc-700 text-slate-400 rounded-full hover:scale-105 transition-transform"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-2xl font-bold dark:text-white uppercase tracking-tight">{profile?.displayName || 'Seeker'}</h1>
+                <button 
+                  onClick={() => { setIsEditingName(true); playSound('click'); }}
+                  className="p-1.5 text-slate-400 hover:text-brand-emerald hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+              </>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-sm">
+            <Mail className="w-4 h-4" />
+            <span>{profile?.email}</span>
+          </div>
         </div>
       </div>
 
@@ -95,7 +179,7 @@ export default function ProfilePage() {
         
         <div className="divide-y divide-slate-100 dark:divide-zinc-800">
           <button 
-            onClick={toggleTheme}
+            onClick={onToggleTheme}
             className="w-full flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors"
           >
             <div className="flex items-center gap-4 text-slate-700 dark:text-slate-200">

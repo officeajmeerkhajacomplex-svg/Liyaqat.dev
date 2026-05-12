@@ -7,7 +7,8 @@ import {
   Sparkles,
   ChevronRight,
   Heart,
-  Bookmark
+  Bookmark,
+  Library
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { Link } from 'react-router-dom';
@@ -172,18 +173,25 @@ export default function Dashboard() {
           {/* Featured Sections Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <ActionCard 
+              to="/collections"
+              icon={Library}
+              title="Spiritual Library"
+              desc="Dhikr, Swalath & Moulid collections."
+              color="emerald"
+            />
+            <ActionCard 
               to="/chat"
               icon={MessageSquare}
               title="DeenFlow AI"
               desc="Ask questions about Islam and get citations."
-              color="emerald"
+              color="gold"
             />
             <ActionCard 
               to="/quran"
               icon={BookOpen}
               title="Quran Reader"
-              desc="Continue where you left off."
-              color="gold"
+              desc="Read, listen and understand the Quran."
+              color="emerald"
             />
           </div>
         </div>
@@ -216,7 +224,9 @@ export default function Dashboard() {
                     )}
                   >
                     <span className={cn("font-semibold", isCurrent ? "text-white" : "text-slate-900 dark:text-white")}>{name}</span>
-                    <span className="font-bold tabular-nums">{time || '--:--'}</span>
+                    <span className="font-bold tabular-nums">
+                      {time ? format(parse(time, 'HH:mm', new Date()), 'h:mm a') : '--:--'}
+                    </span>
                   </div>
                 );
               })}
