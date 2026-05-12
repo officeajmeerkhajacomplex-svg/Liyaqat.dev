@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Amiri:wght@400;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-arabic: "Amiri", serif;
+
+  --color-brand-emerald: #10b981;
+  --color-brand-green-dark: #064e3b;
+  --color-brand-gold: #fbbf24;
+  --color-brand-black: #0a0a0a;
+}
+
+@layer base {
+  body {
+    @apply bg-white text-brand-black dark:bg-brand-black dark:text-white transition-colors duration-300;
+  }
+}
+
+.glass {
+  @apply bg-white/10 backdrop-blur-md border border-white/20;
+}
+
+.glass-dark {
+  @apply bg-black/20 backdrop-blur-md border border-white/10;
+}

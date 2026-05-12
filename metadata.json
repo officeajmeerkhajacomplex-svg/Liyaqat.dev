@@ -1,0 +1,6 @@
+{
+  "name": "DeenFlow",
+  "description": "A modern, premium Islamic AI web application featuring spiritual guidance, Quran reader, prayer times, and an AI chat assistant.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": []
+}
