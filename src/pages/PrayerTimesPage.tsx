@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Clock, 
@@ -90,16 +90,59 @@ export default function PrayerTimesPage() {
     }
   }, [calcMethod, asrMethod]); // Re-fetch when settings change
 
+  const lastAdhanRef = useRef<string | null>(null);
+  const lastHadithRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!times) return;
 
     const timer = setInterval(() => {
       const now = new Date();
       calculatePrayerStates(now, times);
+
+      // --- Daily Hadith Notification ---
+      if (notificationsEnabled) {
+        if (now.getHours() === 9 && now.getMinutes() === 0) {
+          const todayStr = format(now, 'yyyy-MM-dd');
+          if (lastHadithRef.current !== todayStr) {
+            lastHadithRef.current = todayStr;
+            const randomHadith = HADITHS[Math.floor(Math.random() * HADITHS.length)];
+            if ('Notification' in window && Notification.permission === 'granted') {
+               new Notification("Daily Hadith via DeenFlow", {
+                body: `"${randomHadith.text}" — ${randomHadith.source}`,
+                icon: "/favicon.svg"
+               });
+            }
+          }
+        }
+      }
+
+      // --- Adhan & Prayer Notification ---
+      const currentHM = format(now, 'HH:mm');
+      const prayerOrder: string[] = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']; 
+      for (const prayer of prayerOrder) {
+        if (times[prayer] && times[prayer].substring(0, 5) === currentHM) {
+          const trackKey = `${format(now, 'yyyy-MM-dd')}-${prayer}`;
+          if (lastAdhanRef.current !== trackKey) {
+            lastAdhanRef.current = trackKey;
+            
+            if (isAtheanOn) {
+              playSound('adhan');
+            }
+            
+            if (notificationsEnabled && 'Notification' in window && Notification.permission === 'granted') {
+               new Notification("Time for Prayer", {
+                 body: `It's time for ${prayer} prayer.`,
+                 icon: "/favicon.svg"
+               });
+            }
+          }
+        }
+      }
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [times]);
+  }, [times, isAtheanOn, notificationsEnabled]);
 
   const calculatePrayerStates = (now: Date, timings: Record<string, string>) => {
     const prayerOrder: PrayerName[] = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -143,18 +186,36 @@ export default function PrayerTimesPage() {
 
   const handleToggleNotifications = async () => {
     if (!notificationsEnabled) {
-      const permission = await Notification.requestPermission();
-      if (permission === 'granted') {
-        const randomHadith = HADITHS[Math.floor(Math.random() * HADITHS.length)];
-        new Notification("DeenFlow: Notifications Enabled", {
-          body: `"${randomHadith.text}" — ${randomHadith.source}`,
-          icon: "/favicon.ico"
-        });
+      if (!('Notification' in window)) {
+        console.warn("This browser does not support desktop notification");
         setNotificationsEnabled(true);
         localStorage.setItem('notificationsEnabled', 'true');
         playSound('success');
-      } else {
-        alert("Please enable notification permission in your browser settings.");
+        return;
+      }
+      
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          const randomHadith = HADITHS[Math.floor(Math.random() * HADITHS.length)];
+          new Notification("DeenFlow: Notifications Enabled", {
+            body: `"${randomHadith.text}" — ${randomHadith.source}`,
+            icon: "/favicon.svg"
+          });
+          setNotificationsEnabled(true);
+          localStorage.setItem('notificationsEnabled', 'true');
+          playSound('success');
+        } else {
+          console.warn("Notification permission was denied.");
+          // Still mock enable for visual/in-app logic if needed, but standard is to fail
+          // the UI in a friendly way without alerting
+        }
+      } catch (error) {
+        console.warn("Notification restricted by iframe or browser:", error);
+        // Fallback to true so the user can test the UI state without actual native push
+        setNotificationsEnabled(true);
+        localStorage.setItem('notificationsEnabled', 'true');
+        playSound('success');
       }
     } else {
       setNotificationsEnabled(false);
@@ -317,11 +378,11 @@ export default function PrayerTimesPage() {
 
               <div className="p-8 space-y-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
                 {/* Notifications */}
-                <div className="space-y-4">
+                <div id="prayer-notifications-setting" className="space-y-4">
                    <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Global</h3>
                    <div className="flex items-center justify-between p-5 bg-slate-50 dark:bg-zinc-800/50 rounded-3xl border border-slate-100 dark:border-zinc-800">
                     <div className="flex items-center gap-4">
-                      <div className={cn(
+                      <div id="prayer-notifications-icon-container" className={cn(
                         "w-12 h-12 rounded-2xl flex items-center justify-center transition-colors",
                         notificationsEnabled ? "bg-emerald-100 text-brand-emerald" : "bg-slate-100 text-slate-400 dark:bg-zinc-800"
                       )}>
@@ -333,6 +394,7 @@ export default function PrayerTimesPage() {
                       </div>
                     </div>
                     <button 
+                      id="prayer-notifications-toggle-btn"
                       onClick={handleToggleNotifications}
                       className={cn(
                         "w-14 h-8 rounded-full relative transition-all duration-300",
@@ -340,6 +402,7 @@ export default function PrayerTimesPage() {
                       )}
                     >
                       <motion.div 
+                        id="prayer-notifications-toggle-knob"
                         animate={{ x: notificationsEnabled ? 28 : 4 }}
                         className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-sm"
                       />

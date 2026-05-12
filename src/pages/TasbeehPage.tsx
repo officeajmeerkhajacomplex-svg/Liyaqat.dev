@@ -9,9 +9,11 @@ import {
   Plus,
   Minus,
   Vibrate,
-  History as HistoryIcon
+  History as HistoryIcon,
+  Trash2
 } from 'lucide-react';
 import { db, auth } from '@/src/firebase/config';
+import { cn } from '@/src/lib/utils';
 import { 
   collection, 
   addDoc, 
@@ -21,7 +23,9 @@ import {
   limit, 
   onSnapshot,
   Timestamp,
-  serverTimestamp
+  serverTimestamp,
+  deleteDoc,
+  doc
 } from 'firebase/firestore';
 
 interface HistoryItem {
@@ -95,6 +99,16 @@ export default function TasbeehPage() {
     }
   };
 
+  const handleDeleteHistory = async (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!auth.currentUser) return;
+    try {
+      await deleteDoc(doc(db, `users/${auth.currentUser.uid}/tasbeeh_history`, id));
+    } catch (error) {
+      console.error("Error deleting history:", error);
+    }
+  };
+
   const handleReset = () => {
     if (count > 0) {
       saveToHistory(count);
@@ -103,7 +117,7 @@ export default function TasbeehPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0502] text-white pt-20 px-6 pb-24 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0a0502] text-slate-900 dark:text-white pt-20 px-6 pb-24 relative overflow-hidden">
       {/* Bio-Lumining Background Glare */}
       <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
         <div className="absolute top-[20%] left-[10%] w-[60%] h-[60%] bg-brand-emerald/10 blur-[120px] rounded-full animate-pulse" />
@@ -120,17 +134,17 @@ export default function TasbeehPage() {
           >
             Digital Tasbeeh
           </motion.h1>
-          <p className="text-slate-400">Pure focus on your Dhikr</p>
+          <p className="text-slate-500 dark:text-slate-400">Pure focus on your Dhikr</p>
         </div>
 
         {/* Goal Selector */}
-        <div className="flex items-center justify-between bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4">
+        <div className="flex items-center justify-between bg-white dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-4 shadow-sm">
           <div className="space-y-1">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Active Dhikr</span>
             <select 
               value={label}
               onChange={(e) => setLabel(e.target.value)}
-              className="bg-transparent text-white font-medium focus:outline-none cursor-pointer"
+              className="bg-transparent text-slate-900 dark:text-white font-medium focus:outline-none cursor-pointer"
             >
               <option value="SubhanAllah">SubhanAllah</option>
               <option value="Alhamdulillah">Alhamdulillah</option>
@@ -139,11 +153,11 @@ export default function TasbeehPage() {
               <option value="Custom">Custom</option>
             </select>
           </div>
-          <div className="h-8 w-px bg-white/10" />
+          <div className="h-8 w-px bg-slate-200 dark:bg-white/10" />
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setGoal(prev => Math.max(1, prev - 1))}
-              className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+              className="p-1 text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
             >
               <Minus size={18} />
             </button>
@@ -153,7 +167,7 @@ export default function TasbeehPage() {
             </div>
             <button 
               onClick={() => setGoal(prev => prev + 1)}
-              className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+              className="p-1 text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 rounded-lg transition-colors"
             >
               <Plus size={18} />
             </button>
@@ -169,8 +183,8 @@ export default function TasbeehPage() {
               cy="50%"
               r="45%"
               fill="transparent"
-              stroke="rgba(255,255,255,0.05)"
               strokeWidth="4"
+              className="stroke-slate-200 dark:stroke-[rgba(255,255,255,0.05)]"
             />
             <motion.circle
               cx="50%"
@@ -191,7 +205,7 @@ export default function TasbeehPage() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.95 }}
             onClick={handleIncrement}
-            className="w-4/5 h-4/5 rounded-full bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-2xl border border-white/10 shadow-[0_0_50px_rgba(16,185,129,0.1)] flex flex-col items-center justify-center space-y-2 relative"
+            className="w-4/5 h-4/5 rounded-full bg-gradient-to-br from-white to-slate-50 dark:from-white/10 dark:to-white/5 backdrop-blur-2xl border border-slate-200 dark:border-white/10 shadow-xl dark:shadow-[0_0_50px_rgba(16,185,129,0.1)] flex flex-col items-center justify-center space-y-2 relative"
           >
             <AnimatePresence mode="wait">
               <motion.span
@@ -204,31 +218,36 @@ export default function TasbeehPage() {
                 {count}
               </motion.span>
             </AnimatePresence>
-            <span className="text-slate-500 uppercase tracking-[0.3em] text-xs font-bold">Tap to Count</span>
+            <span className="text-slate-500 dark:text-slate-400 uppercase tracking-[0.3em] text-xs font-bold">Tap to Count</span>
           </motion.button>
 
           {/* Floating Actions */}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-6">
+          <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-6">
             <button 
               onClick={handleReset}
-              className="p-3 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-colors"
+              className="p-3 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full border border-slate-200 dark:border-white/10 transition-colors shadow-sm"
               title="Reset"
             >
-              <RotateCcw size={20} className="text-slate-400" />
+              <RotateCcw size={20} className="text-slate-500 dark:text-slate-400" />
             </button>
             <button 
               onClick={() => setVibrateEnabled(!vibrateEnabled)}
-              className={`p-3 rounded-full border border-white/10 transition-colors ${vibrateEnabled ? 'bg-brand-emerald/20 text-brand-emerald' : 'bg-white/5 text-slate-400'}`}
+              className={cn(
+                "p-3 rounded-full border transition-colors shadow-sm",
+                vibrateEnabled 
+                  ? "bg-brand-emerald/20 text-brand-emerald border-brand-emerald/20" 
+                  : "bg-white dark:bg-white/5 text-slate-400 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/10"
+              )}
               title="Toggle Vibration"
             >
               <Vibrate size={20} />
             </button>
             <button 
               onClick={() => setShowHistory(!showHistory)}
-              className="p-3 bg-white/5 hover:bg-white/10 rounded-full border border-white/10 transition-colors"
+              className="p-3 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 rounded-full border border-slate-200 dark:border-white/10 transition-colors shadow-sm"
               title="History"
             >
-              <HistoryIcon size={20} className="text-slate-400" />
+              <HistoryIcon size={20} className="text-slate-500 dark:text-slate-400" />
             </button>
           </div>
         </div>
@@ -248,16 +267,25 @@ export default function TasbeehPage() {
               </h3>
               <div className="space-y-3">
                 {history.length > 0 ? history.map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 bg-white/5 border border-white/10 rounded-xl">
+                  <div key={item.id} className="flex items-center justify-between p-4 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-brand-emerald/20 rounded-lg flex items-center justify-center text-brand-emerald font-bold">
+                      <div className="w-8 h-8 bg-brand-emerald/10 dark:bg-brand-emerald/20 rounded-lg flex items-center justify-center text-brand-emerald font-bold">
                         {item.count}
                       </div>
-                      <span className="font-medium">{item.label}</span>
+                      <span className="font-medium text-slate-900 dark:text-white">{item.label}</span>
                     </div>
-                    <span className="text-xs text-slate-500">
-                      {item.timestamp?.toDate().toLocaleDateString()}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-xs text-slate-500">
+                        {item.timestamp?.toDate().toLocaleDateString()}
+                      </span>
+                      <button 
+                        onClick={(e) => handleDeleteHistory(item.id, e)}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                        title="Delete Goal"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
                   </div>
                 )) : (
                   <p className="text-center text-slate-500 py-4 italic">No sessions recorded yet.</p>

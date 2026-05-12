@@ -4,6 +4,7 @@ const sounds = {
   tap: 'https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3',
   success: 'https://assets.mixkit.co/active_storage/sfx/3005/3005-preview.mp3',
   message: 'https://assets.mixkit.co/active_storage/sfx/2157/2157-preview.mp3',
+  adhan: 'https://server11.mp3quran.net/adhan/Makkah.mp3',
 };
 
 export const playSound = (type: keyof typeof sounds) => {

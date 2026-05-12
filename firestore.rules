@@ -106,6 +106,7 @@ service cloud.firestore {
       match /tasbeeh_history/{historyId} {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidTasbeeh(incoming());
+        allow delete: if isOwner(userId);
       }
     }
   }
