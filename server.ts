@@ -1,15 +1,19 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import Groq from "groq-sdk";
 import dotenv from "dotenv";
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Safer __dirname for both ESM, CJS, and Vercel environments
+const getDirname = () => {
+  if (typeof __dirname !== "undefined") return __dirname;
+  if (typeof import.meta !== "undefined" && import.meta.url) return path.dirname(fileURLToPath(import.meta.url));
+  return process.cwd();
+};
+const _dirname = getDirname();
 
 const app = express();
 app.use(express.json());
@@ -95,17 +99,18 @@ app.post("/api/chat", async (req, res) => {
 });
 
 async function startServer() {
-  const PORT = process.env.PORT || 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Vite integration
   if (process.env.NODE_ENV !== "production") {
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.resolve(__dirname, "dist");
+    const distPath = path.resolve(_dirname, "dist");
     console.log(`Serving static files from: ${distPath}`);
     app.use(express.static(distPath));
     app.get("*", (req, res) => {
@@ -114,7 +119,8 @@ async function startServer() {
     });
   }
 
-  if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  // Only listen in development or explicit standalone modes (not in Vercel serverless)
+  if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
     app.listen(PORT, "0.0.0.0", () => {
       console.log(`Server running on http://localhost:${PORT}`);
     });

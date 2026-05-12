@@ -10,7 +10,10 @@ export const playSound = (type: keyof typeof sounds) => {
   try {
     const audio = new Audio(sounds[type]);
     audio.volume = 0.4;
-    audio.play();
+    audio.play().catch(e => {
+      // Ignore audio playback errors (e.g. no supported source or user interaction required)
+      console.warn('Silent fallback, audio failed:', e);
+    });
   } catch (err) {
     console.error('Failed to play sound:', err);
   }
