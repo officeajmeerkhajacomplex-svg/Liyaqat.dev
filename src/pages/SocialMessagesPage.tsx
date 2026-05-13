@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { useSocialStore, SocialChat, PublicProfile } from '../store/useSocialStore';
 import { 
   MessageCircle, Search, Edit, Users, Lock, ChevronLeft, 
-  Send, Plus, MoreVertical, ShieldCheck, Share, ExternalLink
+  Send, Plus, MoreVertical, ShieldCheck, Share, ExternalLink, UserPlus,
+  Trash2, CornerUpLeft, Smile
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { playSound } from '../lib/sounds';
@@ -14,13 +15,17 @@ export default function SocialMessagesPage() {
   const { 
     initialize, isInitialized, chats, activeChatId, 
     activeChatMessages, setActiveChat, startDirectChat, sendMessage,
-    loadingMessages, publicProfile, contacts, createGroupChat
+    loadingMessages, publicProfile, contacts, createGroupChat,
+    setTypingTo, reactToMessage, deleteMessage, deleteChat
   } = useSocialStore();
   const { user } = useAuthStore();
 
   const [messageInput, setMessageInput] = useState('');
   const [showNewChat, setShowNewChat] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [replyToId, setReplyToId] = useState<string | null>(null);
+  const [hoveredMsgId, setHoveredMsgId] = useState<string | null>(null);
+  const [showChatOptions, setShowChatOptions] = useState(false);
   
   // Group Creation State
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
@@ -28,6 +33,7 @@ export default function SocialMessagesPage() {
   const [groupName, setGroupName] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (!isInitialized) {
@@ -37,26 +43,78 @@ export default function SocialMessagesPage() {
 
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
     }
   }, [activeChatMessages]);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      setTypingTo(null);
+    };
+  }, [activeChatId, setTypingTo]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessageInput(e.target.value);
+    if (!activeChatId) return;
+
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    setTypingTo(activeChatId);
+    
+    typingTimeoutRef.current = setTimeout(() => {
+       setTypingTo(null);
+    }, 2000);
+  };
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!messageInput.trim() || !activeChatId) return;
 
     const currentText = messageInput;
+    const currentReplyTo = replyToId;
     setMessageInput('');
+    setReplyToId(null);
+    if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+    setTypingTo(null);
+
     try {
-      await sendMessage(activeChatId, currentText);
+      await sendMessage(activeChatId, currentText, currentReplyTo || undefined);
       playSound('message');
     } catch (err) {
       console.error(err);
       setMessageInput(currentText);
+      if (currentReplyTo) setReplyToId(currentReplyTo);
     }
   };
 
   const activeChat = chats.find(c => c.id === activeChatId);
+  const typingParticipants = activeChat?.participants.filter(pid => {
+    if (pid === user?.uid) return false;
+    const contact = contacts.find(c => c.uid === pid);
+    return contact?.typingTo === activeChatId;
+  });
+
+  const getOnlineStatusText = (chat: SocialChat) => {
+    if (chat.type === 'group') {
+       if (typingParticipants && typingParticipants.length > 0) return `${typingParticipants.length} typing...`;
+       return `${chat.participants.length} members`;
+    } else {
+       const other = chat.otherParticipant;
+       if (!other) return '';
+       if (other.typingTo === chat.id) return 'Typing...';
+       if (other.isOnline) return 'Online';
+       if (other.lastSeen) {
+         try {
+           return `Last seen ${format(new Date(other.lastSeen), 'p')}`;
+         } catch { return ''; }
+       }
+       return '';
+    }
+  };
+
+  const replyToMsg = activeChatMessages.find(m => m.id === replyToId);
 
   return (
     <div className="h-full w-full flex flex-col md:flex-row bg-white dark:bg-brand-black md:rounded-none overflow-hidden border-t md:border-t-0 border-slate-100 dark:border-zinc-800 relative shadow-[0_0_40px_rgba(0,0,0,0.05)] dark:shadow-[0_0_40px_rgba(0,0,0,0.2)]">
@@ -103,6 +161,8 @@ export default function SocialMessagesPage() {
             const isGroup = chat.type === 'group';
             const name = isGroup ? chat.name : (chat.otherParticipant?.displayName || "Unknown User");
             const avatar = isGroup ? chat.groupImage : chat.otherParticipant?.photoURL;
+            const isOnline = !isGroup && chat.otherParticipant?.isOnline;
+            
             return (
               <button
                 key={chat.id}
@@ -122,10 +182,14 @@ export default function SocialMessagesPage() {
                        {name?.[0]?.toUpperCase() || <Users className="w-5 h-5"/>}
                      </div>
                   )}
-                  {isGroup && (
+                  {isGroup ? (
                     <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-slate-100 dark:bg-zinc-700 rounded-full flex items-center justify-center border-2 border-white dark:border-zinc-800">
                       <Users className="w-3 h-3 text-slate-500 dark:text-slate-300" />
                     </div>
+                  ) : (
+                    isOnline && (
+                      <div className="absolute top-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-zinc-800"></div>
+                    )
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -138,7 +202,6 @@ export default function SocialMessagesPage() {
                     )}
                   </div>
                   <p className="text-sm text-slate-500 dark:text-zinc-500 truncate font-medium">
-                    {/* we don't have last message preview decrypted easily, show enc status */}
                     <span className="flex items-center gap-1 opacity-80">
                       <Lock className="w-3 h-3" /> Encrypted message
                     </span>
@@ -160,7 +223,7 @@ export default function SocialMessagesPage() {
       </div>
 
       {/* Main Chat Area */}
-      {activeChatId ? (
+      {activeChatId && activeChat ? (
         <div className="flex-1 flex flex-col bg-white dark:bg-[#0a0a0a] relative z-10 w-full h-full">
           {/* Header */}
           <div className="p-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-[#0a0a0a] sticky top-0 z-20">
@@ -173,36 +236,64 @@ export default function SocialMessagesPage() {
                 </button>
                 {/* Active Chat Info */}
                 <div className="flex items-center gap-3">
-                  {activeChat?.type === 'group' ? (
-                     <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-brand-emerald">
-                       <Users className="w-5 h-5"/>
-                     </div>
-                  ) : (
-                     <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
-                       {activeChat?.otherParticipant?.photoURL ? (
-                         <img src={activeChat.otherParticipant.photoURL} alt="" className="w-full h-full object-cover" />
-                       ) : (
-                         activeChat?.otherParticipant?.displayName?.[0] || 'U'
-                       )}
-                     </div>
-                  )}
+                  <div className="relative">
+                    {activeChat?.type === 'group' ? (
+                       <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-brand-emerald">
+                         <Users className="w-5 h-5"/>
+                       </div>
+                    ) : (
+                       <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
+                         {activeChat?.otherParticipant?.photoURL ? (
+                           <img src={activeChat.otherParticipant.photoURL} alt="" className="w-full h-full object-cover" />
+                         ) : (
+                           activeChat?.otherParticipant?.displayName?.[0] || 'U'
+                         )}
+                       </div>
+                    )}
+                    {activeChat && activeChat.type === 'direct' && activeChat.otherParticipant?.isOnline && (
+                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#0a0a0a]"></div>
+                    )}
+                  </div>
                   <div>
                     <h3 className="font-bold text-slate-800 dark:text-white leading-tight">
                       {activeChat?.type === 'group' ? activeChat.name : activeChat?.otherParticipant?.displayName}
                     </h3>
                     <p className="text-xs text-brand-emerald font-medium flex items-center gap-1">
-                      <Lock className="w-3 h-3" /> End-to-End Encrypted
+                      {activeChat && getOnlineStatusText(activeChat)}
                     </p>
                   </div>
                 </div>
              </div>
-             <button className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300">
-               <MoreVertical className="w-5 h-5" />
-             </button>
+             
+             <div className="relative">
+               <button 
+                 onClick={() => setShowChatOptions(!showChatOptions)}
+                 className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
+               >
+                 <MoreVertical className="w-5 h-5" />
+               </button>
+               <AnimatePresence>
+                 {showChatOptions && activeChat && (
+                   <motion.div 
+                     initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                     animate={{ opacity: 1, scale: 1, y: 0 }}
+                     exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                     className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-zinc-900 border border-slate-100 dark:border-zinc-800 rounded-xl shadow-xl overflow-hidden z-50 text-sm"
+                   >
+                     <button 
+                       onClick={() => { setShowChatOptions(false); deleteChat(activeChat.id); }}
+                       className="w-full text-left px-4 py-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 font-medium flex items-center gap-2"
+                     >
+                       <Trash2 className="w-4 h-4" /> Delete {activeChat.type === 'group' ? 'Group' : 'Chat'}
+                     </button>
+                   </motion.div>
+                 )}
+               </AnimatePresence>
+             </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scrollbar bg-slate-50/50 dark:bg-transparent">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 custom-scrollbar bg-slate-50/50 dark:bg-transparent pb-32">
              {loadingMessages && activeChatMessages.length === 0 ? (
                <div className="flex items-center justify-center h-full">
                  <div className="animate-spin w-8 h-8 border-4 border-emerald-100 border-t-brand-emerald rounded-full" />
@@ -210,37 +301,101 @@ export default function SocialMessagesPage() {
              ) : (
                activeChatMessages.map((msg, i) => {
                  const isMe = msg.senderId === user?.uid;
-                 // Add subtle groupings if previous message was same sender
                  const prevMsg = activeChatMessages[i - 1];
                  const isConsecutive = prevMsg?.senderId === msg.senderId;
+                 const isDeleted = msg.isDeleted;
                  
                  return (
                    <motion.div 
                      initial={{ opacity: 0, y: 10 }}
                      animate={{ opacity: 1, y: 0 }}
                      key={msg.id} 
-                     className={cn("flex flex-col", isMe ? "items-end" : "items-start", isConsecutive ? "mt-1" : "mt-6")}
+                     className={cn("flex flex-col group/message relative", isMe ? "items-end" : "items-start", isConsecutive ? "mt-1" : "mt-6")}
+                     onMouseEnter={() => setHoveredMsgId(msg.id)}
+                     onMouseLeave={() => setHoveredMsgId(null)}
                    >
                      {!isMe && !isConsecutive && activeChat?.type === 'group' && (
                        <span className="text-[10px] uppercase font-bold text-slate-400 ml-4 mb-1 tracking-wider">
-                         {contacts.find(c => c.uid === msg.senderId)?.displayName || msg.senderId.slice(0, 5)}
+                         {contacts.find(c => c.uid === msg.senderId)?.displayName || 'Unknown'}
                        </span>
                      )}
-                     <div className={cn(
-                       "px-5 py-3 md:py-3.5 max-w-[85%] md:max-w-[70%] font-medium md:text-md",
-                       isMe 
-                        ? "bg-brand-emerald text-white rounded-[24px] rounded-br-[8px]" 
-                        : "bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-100 rounded-[24px] rounded-bl-[8px] border border-slate-100 dark:border-zinc-800 shadow-sm"
-                     )}>
-                       {msg.decryptedText || (
-                         <span className="flex items-center gap-2 opacity-50">
-                           <ShieldCheck className="w-4 h-4 animate-pulse" /> Decrypting...
-                         </span>
+                     
+                     <div className="flex items-center max-w-[85%] md:max-w-[70%] gap-2 -my-2 py-2">
+                       {/* Action Buttons (Left side if isMe) */}
+                       {isMe && hoveredMsgId === msg.id && !isDeleted && (
+                         <div className="flex items-center gap-1 mr-2 opacity-0 group-hover/message:opacity-100 transition-opacity">
+                           <button onClick={() => deleteMessage(activeChatId, msg.id)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full">
+                             <Trash2 className="w-4 h-4"/>
+                           </button>
+                         </div>
+                       )}
+
+                       <div className="flex flex-col relative w-full">
+                         {msg.replyTo && (
+                           <div className={cn(
+                             "flex items-center gap-2 mb-1 px-3 py-1.5 rounded-xl text-xs opacity-70",
+                             isMe ? "bg-emerald-500/20 text-emerald-900 dark:text-emerald-100 self-end" : "bg-slate-200 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 self-start"
+                           )}>
+                             <CornerUpLeft className="w-3 h-3" />
+                             <span className="truncate max-w-[200px]">
+                               {activeChatMessages.find(m => m.id === msg.replyTo)?.decryptedText || 'Message'}
+                             </span>
+                           </div>
+                         )}
+                         <div className={cn(
+                           "px-5 py-3 md:py-3.5 font-medium md:text-md relative",
+                           isMe 
+                            ? (isDeleted ? "bg-slate-200 dark:bg-zinc-800 text-slate-500 rounded-[24px] rounded-br-[8px]" : "bg-brand-emerald text-white rounded-[24px] rounded-br-[8px]")
+                            : (isDeleted ? "bg-slate-100 dark:bg-zinc-800 text-slate-400 rounded-[24px] rounded-bl-[8px]" : "bg-white dark:bg-zinc-800 text-slate-800 dark:text-zinc-100 rounded-[24px] rounded-bl-[8px] border border-slate-100 dark:border-zinc-800 shadow-sm")
+                         )}>
+                           {isDeleted ? (
+                             <span className="italic flex items-center gap-2"><Trash2 className="w-4 h-4"/> Message deleted</span>
+                           ) : (
+                             msg.decryptedText || (
+                               <span className="flex items-center gap-2 opacity-50">
+                                 <ShieldCheck className="w-4 h-4 animate-pulse" /> Decrypting...
+                               </span>
+                             )
+                           )}
+                           
+                           {/* Reactions display */}
+                           {msg.reactions && Object.keys(msg.reactions).length > 0 && (
+                             <div className={cn(
+                               "absolute -bottom-3 flex items-center gap-1 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-full px-2 py-0.5 shadow-sm text-sm z-10",
+                               isMe ? "-left-2" : "-right-2"
+                             )}>
+                               {Object.entries(msg.reactions).map(([uid, emoji]) => (
+                                 <span key={uid}>{emoji}</span>
+                               ))}
+                             </div>
+                           )}
+                         </div>
+                       </div>
+
+                       {/* Action Buttons (Right side if not isMe) */}
+                       {!isMe && hoveredMsgId === msg.id && !isDeleted && (
+                         <div className="flex items-center gap-1 ml-2 opacity-0 group-hover/message:opacity-100 transition-opacity">
+                           <button onClick={() => reactToMessage(activeChatId, msg.id, '❤️')} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full">
+                             ❤️
+                           </button>
+                           <button onClick={() => setReplyToId(msg.id)} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full">
+                             <CornerUpLeft className="w-4 h-4"/>
+                           </button>
+                         </div>
+                       )}
+                       {isMe && hoveredMsgId === msg.id && !isDeleted && (
+                         <div className="flex items-center gap-1 opacity-0 group-hover/message:opacity-100 transition-opacity">
+                            <button onClick={() => setReplyToId(msg.id)} className="p-1.5 text-slate-400 hover:text-emerald-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full">
+                             <CornerUpLeft className="w-4 h-4"/>
+                           </button>
+                         </div>
                        )}
                      </div>
+
                      <span className={cn(
                        "text-[10px] text-slate-400 mt-1.5 font-medium",
-                       isMe ? "mr-2" : "ml-2"
+                       isMe ? "mr-2" : "ml-2",
+                       msg.reactions && Object.keys(msg.reactions).length > 0 ? "mt-3" : ""
                      )}>
                        {format(new Date(msg.timestamp), 'h:mm a')}
                      </span>
@@ -253,15 +408,25 @@ export default function SocialMessagesPage() {
              <div ref={messagesEndRef} className="h-4"></div>
           </div>
 
-          {/* Input Area */}
-          <div className="p-4 bg-white dark:bg-[#0a0a0a] border-t border-slate-100 dark:border-zinc-800 sticky bottom-0">
+          {/* Sticky Input Area */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-t border-slate-100 dark:border-zinc-800 z-20">
+            {replyToId && replyToMsg && (
+              <div className="flex items-center justify-between bg-slate-100 dark:bg-zinc-900 rounded-t-2xl -mx-4 -mt-4 px-4 py-2 border-b border-slate-200 dark:border-zinc-800">
+                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-400 truncate">
+                  <CornerUpLeft className="w-4 h-4 text-brand-emerald" />
+                  <span className="font-bold">{replyToMsg.senderId === user?.uid ? 'Replying to yourself' : 'Replying'}</span>
+                  <span className="truncate opacity-70">: {replyToMsg.decryptedText}</span>
+                </div>
+                <button onClick={() => setReplyToId(null)} className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-full">✕</button>
+              </div>
+            )}
             <form onSubmit={handleSend} className="flex gap-2">
               <div className="flex-1 relative">
                 <input 
                   type="text"
                   placeholder="Type an encrypted message..."
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={handleInputChange}
                   className="w-full bg-slate-100 dark:bg-zinc-900 rounded-full pl-6 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white"
                 />
               </div>
@@ -278,21 +443,18 @@ export default function SocialMessagesPage() {
       ) : (
         <div className="hidden md:flex flex-1 flex-col items-center justify-center bg-slate-50/50 dark:bg-[#0a0a0a]/50 text-center p-8">
           <div className="w-32 h-32 mb-8 relative">
-            <div className="absolute inset-0 bg-brand-emerald/10 dark:bg-brand-emerald/5 rounded-[3rem] rotate-12 blur-xl" />
-            <div className="absolute inset-0 bg-white dark:bg-zinc-900 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-2xl flex items-center justify-center z-10">
-              <ShieldCheck className="w-12 h-12 text-brand-emerald" />
-            </div>
-            <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-white dark:bg-zinc-800 rounded-full border border-slate-100 dark:border-zinc-800 shadow-lg flex items-center justify-center z-20">
-              <Lock className="w-5 h-5 text-slate-400" />
-            </div>
+             <div className="absolute inset-0 bg-brand-emerald/10 dark:bg-brand-emerald/5 rounded-[3rem] rotate-12 blur-xl" />
+             <div className="absolute inset-0 bg-white dark:bg-zinc-900 rounded-[2rem] border border-slate-100 dark:border-zinc-800 shadow-2xl flex items-center justify-center z-10">
+               <ShieldCheck className="w-12 h-12 text-brand-emerald" />
+             </div>
+             <div className="absolute -bottom-4 -right-4 w-12 h-12 bg-white dark:bg-zinc-800 rounded-full border border-slate-100 dark:border-zinc-800 shadow-lg flex items-center justify-center z-20">
+               <Lock className="w-5 h-5 text-slate-400" />
+             </div>
           </div>
           <h2 className="text-3xl font-bold dark:text-white mb-4">DeenFlow <span className="font-serif italic text-brand-emerald">Secure</span></h2>
           <p className="text-slate-500 dark:text-slate-400 max-w-md mx-auto text-lg leading-relaxed">
              A private, beautifully crafted space to connect with your spiritual community.
           </p>
-          <div className="mt-8 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 bg-white dark:bg-zinc-900 px-6 py-3 rounded-full border border-slate-100 dark:border-zinc-800">
-             <Lock className="w-4 h-4" /> End-to-End Encrypted
-          </div>
         </div>
       )}
 

@@ -4,6 +4,7 @@ import {
   collection, doc, getDoc, setDoc, query, where, onSnapshot, 
   orderBy, addDoc, updateDoc, serverTimestamp, arrayUnion, Unsubscribe
 } from 'firebase/firestore';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { 
   generateKeyPair, exportPublicKey, exportPrivateKey, 
   importPrivateKey, importPublicKey, encryptMessageKey, decryptMessageKey,
@@ -12,12 +13,30 @@ import {
 } from '../lib/crypto';
 import { MessageSquare, Users, UserPlus } from 'lucide-react';
 
+function handleFirestoreError(error: any, operationType: string, path: string) {
+  const errInfo = {
+    error: error instanceof Error ? error.message : String(error),
+    authInfo: {
+      userId: auth.currentUser?.uid,
+      email: auth.currentUser?.email,
+      emailVerified: auth.currentUser?.emailVerified,
+    },
+    operationType,
+    path
+  };
+  console.error('Firestore Error:', JSON.stringify(errInfo));
+  throw new Error(JSON.stringify(errInfo));
+}
+
 export interface PublicProfile {
   uid: string;
   displayName: string;
   photoURL: string;
   publicKey: string;
   updatedAt: string;
+  isOnline?: boolean;
+  lastSeen?: any;
+  typingTo?: string | null;
 }
 
 export interface SocialChat {
@@ -44,6 +63,8 @@ export interface SocialMessage {
   timestamp: string;
   seenBy: string[];
   replyTo?: string;
+  isDeleted?: boolean;
+  reactions?: Record<string, string>; // uid -> emoji
   // UI helper fields:
   decryptedText?: string;
   isDecrypted?: boolean;
@@ -64,7 +85,11 @@ interface SocialState {
   setActiveChat: (chatId: string | null) => void;
   startDirectChat: (otherUserId: string) => Promise<string>;
   createGroupChat: (name: string, participantIds: string[]) => Promise<string>;
-  sendMessage: (chatId: string, text: string) => Promise<void>;
+  sendMessage: (chatId: string, text: string, replyTo?: string) => Promise<void>;
+  deleteChat: (chatId: string) => Promise<void>;
+  deleteMessage: (chatId: string, messageId: string) => Promise<void>;
+  reactToMessage: (chatId: string, messageId: string, emoji: string) => Promise<void>;
+  setTypingTo: (chatId: string | null) => Promise<void>;
   cleanup: () => void;
 }
 
@@ -113,6 +138,26 @@ export const useSocialStore = create<SocialState>((set, get) => ({
       set({ publicProfile: profileData as PublicProfile, privateKeyPem: privKey });
     } else {
       set({ publicProfile: profileSnap.data() as PublicProfile, privateKeyPem: privKey });
+    }
+
+    // Attempt FCM setup
+    try {
+      const messaging = getMessaging();
+      const token = await getToken(messaging, { vapidKey: 'BHzJ...' }); // Placeholder VAPID
+      if (token) {
+        await updateDoc(profileRef, { fcmToken: token });
+      }
+      onMessage(messaging, (payload) => {
+        // Simple built-in notification handling
+        if (Notification.permission === 'granted') {
+           new Notification(payload.notification?.title || 'New message', {
+             body: payload.notification?.body,
+             icon: '/icon.png'
+           });
+        }
+      });
+    } catch(e) {
+      console.log('FCM not configured or permission denied', e);
     }
 
     // 2. Load Contacts (all public profiles for now, except self)
@@ -268,7 +313,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
     return newChatRef.id;
   },
 
-  sendMessage: async (chatId: string, text: string) => {
+  sendMessage: async (chatId: string, text: string, replyTo?: string) => {
     const user = auth.currentUser;
     if (!user) throw new Error("Not logged in");
     
@@ -299,7 +344,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
        }
     }
 
-    const newMessage = {
+    const newMessage: any = {
       senderId: user.uid,
       encryptedMessage: encryptedMessageString,
       encryptedKeys,
@@ -308,6 +353,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
       timestamp: serverTimestamp(),
       seenBy: [user.uid]
     };
+    if (replyTo) newMessage.replyTo = replyTo;
 
     // Add message
     await addDoc(collection(db, `social_chats/${chatId}/messages`), newMessage);
@@ -316,6 +362,79 @@ export const useSocialStore = create<SocialState>((set, get) => ({
     await updateDoc(doc(db, 'social_chats', chatId), {
       lastMessageAt: serverTimestamp()
     });
+  },
+
+  deleteChat: async (chatId: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const chatRef = doc(db, 'social_chats', chatId);
+    try {
+      const snap = await getDoc(chatRef);
+      if (!snap.exists()) return;
+      
+      const data = snap.data() as SocialChat;
+      const updatedParticipants = data.participants.filter(p => p !== user.uid);
+      
+      get().setActiveChat(null);
+      
+      await updateDoc(chatRef, {
+        participants: updatedParticipants
+      });
+    } catch (error) {
+      handleFirestoreError(error, 'update', `social_chats/${chatId}`);
+    }
+  },
+
+  deleteMessage: async (chatId: string, messageId: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const path = `social_chats/${chatId}/messages/${messageId}`;
+    try {
+      const msgRef = doc(db, path);
+      await updateDoc(msgRef, {
+        isDeleted: true
+      });
+    } catch (error) {
+      handleFirestoreError(error, 'update', path);
+    }
+  },
+
+  reactToMessage: async (chatId: string, messageId: string, emoji: string) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    const path = `social_chats/${chatId}/messages/${messageId}`;
+    try {
+      const msgRef = doc(db, path);
+      const msg = get().activeChatMessages.find(m => m.id === messageId);
+      if (!msg) return;
+
+      let reactions = msg.reactions || {};
+      if (reactions[user.uid] === emoji) {
+         // Toggle off
+         const newReactions = { ...reactions };
+         delete newReactions[user.uid];
+         await updateDoc(msgRef, { reactions: newReactions });
+      } else {
+         await updateDoc(msgRef, { reactions: { ...reactions, [user.uid]: emoji } });
+      }
+    } catch (error) {
+      handleFirestoreError(error, 'update', path);
+    }
+  },
+
+  setTypingTo: async (chatId: string | null) => {
+    const user = auth.currentUser;
+    if (!user) return;
+    try {
+       const profileRef = doc(db, 'public_profiles', user.uid);
+       if (chatId) {
+         await updateDoc(profileRef, { typingTo: chatId, isOnline: true, lastSeen: serverTimestamp() });
+       } else {
+         await updateDoc(profileRef, { typingTo: null, isOnline: true, lastSeen: serverTimestamp() });
+       }
+    } catch(e) {
+      // ignore
+    }
   },
 
   cleanup: () => {
