@@ -16,8 +16,20 @@
 }
 
 @layer base {
+  :root {
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   body {
-    @apply bg-white text-brand-black dark:bg-brand-black dark:text-white transition-colors duration-300;
+    @apply bg-white text-brand-black dark:bg-brand-black dark:text-white transition-colors duration-300 antialiased;
+    font-size: 14px; /* Default body size for mobile */
+  }
+
+  @screen md {
+    body {
+      font-size: 16px;
+    }
   }
 }
 

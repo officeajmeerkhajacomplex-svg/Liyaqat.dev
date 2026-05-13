@@ -186,21 +186,21 @@ export default function ChatPage() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-2">
+            <div className="flex-1 overflow-y-auto px-4 pb-6 space-y-1">
             {chats.map(chat => (
               <div
                 key={chat.id}
                 onClick={() => { navigate(`/chat/${chat.id}`); setIsSidebarOpen(false); }}
                 className={cn(
-                  "group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all",
+                  "group flex items-center justify-between p-2.5 rounded-xl cursor-pointer transition-all",
                   chatId === chat.id 
                     ? "bg-brand-emerald/10 text-brand-emerald" 
                     : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-zinc-800/50"
                 )}
               >
-                <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-2.5 min-w-0">
                   <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium truncate">{chat.title}</span>
+                  <span className="text-xs font-medium truncate">{chat.title}</span>
                 </div>
                 <button 
                   onClick={(e) => {
@@ -221,45 +221,45 @@ export default function ChatPage() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col bg-white dark:bg-zinc-900 rounded-[2rem] border border-slate-200 dark:border-zinc-800 overflow-hidden shadow-sm relative">
         {/* Chat Header */}
-        <div className="p-4 border-b border-slate-100 dark:border-zinc-800/50 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <div className="px-4 py-3 border-b border-slate-100 dark:border-zinc-800/50 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg"
+              className="md:hidden p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg"
             >
               <List className="w-5 h-5 dark:text-white" />
             </button>
             <div className="hidden md:block">
               <button 
                 onClick={() => navigate('/dashboard')}
-                className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg"
+                className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg"
               >
                 <ArrowLeft className="w-5 h-5 dark:text-white" />
               </button>
             </div>
-            <div>
-              <h2 className="font-bold dark:text-white flex items-center gap-2">
+            <div className="min-w-0">
+              <h2 className="font-bold text-sm md:text-base dark:text-white flex items-center gap-2 leading-none">
                 DeenFlow AI
               </h2>
-              <p className="text-[10px] text-slate-500 font-medium">Spiritual Companion</p>
+              <p className="text-[9px] text-slate-500 font-medium mt-0.5">Spiritual Companion</p>
             </div>
           </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
               <button 
                 onClick={(e) => {
                    e.stopPropagation();
                    if (chatId) setDeleteConfirmId(chatId);
                 }}
                 className={cn(
-                  "p-2 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-400 hover:text-red-500 rounded-lg transition-all",
+                  "p-1.5 hover:bg-red-50 dark:hover:bg-red-950/30 text-slate-400 hover:text-red-500 rounded-lg transition-all",
                   !chatId && "hidden"
                 )}
                 title="Delete Current Chat"
               >
-                <Trash2 className="w-5 h-5" />
+                <Trash2 className="w-4.5 h-4.5" />
               </button>
-              <button className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg">
-                <MoreVertical className="w-5 h-5 text-slate-400" />
+              <button className="p-1.5 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg">
+                <MoreVertical className="w-4.5 h-4.5 text-slate-400" />
               </button>
             </div>
         </div>
@@ -354,26 +354,25 @@ export default function ChatPage() {
           )}
         </div>
 
-        {/* Input */}
-        <div className="p-4 md:p-6 border-t border-slate-100 dark:border-zinc-800/50">
-          <form onSubmit={handleSend} className="relative flex items-center gap-3">
+        <div className="p-3 md:p-6 border-t border-slate-100 dark:border-zinc-800/50">
+          <form onSubmit={handleSend} className="relative flex items-center gap-2.5">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Type your question..."
-              className="flex-1 pl-6 pr-14 py-4 bg-slate-100 dark:bg-zinc-800 border-none rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white transition-all text-sm font-medium"
+              className="flex-1 pl-5 pr-12 py-3 bg-slate-100 dark:bg-zinc-800 border-none rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white transition-all text-xs md:text-sm font-medium"
             />
             <button
               type="submit"
               disabled={loading || !input.trim()}
-              className="absolute right-2 p-2 bg-brand-emerald text-white rounded-xl shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+              className="absolute right-1.5 p-1.5 bg-brand-emerald text-white rounded-lg shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-4 h-4" />
             </button>
           </form>
-          <div className="mt-3 flex items-center gap-2 text-[10px] text-slate-400 font-medium justify-center">
-            <Shield className="w-3 h-3" />
+          <div className="mt-2.5 flex items-center gap-2 text-[9px] text-slate-400 font-medium justify-center opacity-70">
+            <Shield className="w-2.5 h-2.5" />
             <span>AI responses should be verified with authentic Islamic scholars.</span>
           </div>
         </div>

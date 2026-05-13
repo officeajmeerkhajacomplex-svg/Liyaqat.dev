@@ -257,33 +257,33 @@ export default function MasjidFinderPage() {
   };
 
   return (
-    <div className="flex flex-col gap-6 h-[calc(100vh-11rem)] md:h-[calc(100vh-8rem)]">
+    <div className="flex flex-col gap-4 md:gap-6 h-[calc(100vh-10rem)] md:h-[calc(100vh-8rem)]">
       {/* Mobile View Toggle */}
-      <div className="flex md:hidden bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm self-center">
+      <div className="flex md:hidden bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-slate-200 dark:border-zinc-800 shadow-sm self-center shrink-0">
         <button 
           onClick={() => setViewMode('map')}
           className={cn(
-            "px-6 py-2 rounded-xl text-xs font-bold transition-all",
-            viewMode === 'map' ? "bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20" : "text-slate-500"
+            "px-5 py-1.5 rounded-xl text-[10px] font-bold transition-all",
+            viewMode === 'map' ? "bg-brand-emerald text-white shadow-lg shadow-emerald-500/10" : "text-slate-500"
           )}
         >
-          Map View
+          Map
         </button>
         <button 
           onClick={() => setViewMode('list')}
           className={cn(
-            "px-6 py-2 rounded-xl text-xs font-bold transition-all",
-            viewMode === 'list' ? "bg-brand-emerald text-white shadow-lg shadow-brand-emerald/20" : "text-slate-500"
+            "px-5 py-1.5 rounded-xl text-[10px] font-bold transition-all",
+            viewMode === 'list' ? "bg-brand-emerald text-white shadow-lg shadow-emerald-500/10" : "text-slate-500"
           )}
         >
-          List View
+          List
         </button>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 h-full overflow-hidden">
+      <div className="flex flex-col md:flex-row gap-3 md:gap-4 h-full overflow-hidden">
         {/* Map Container */}
         <div className={cn(
-          "flex-1 relative rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-xl bg-slate-200 dark:bg-zinc-800 z-0 transition-all duration-300",
+          "flex-1 relative rounded-2xl md:rounded-[2.5rem] overflow-hidden border border-slate-200 dark:border-zinc-800 shadow-xl bg-slate-200 dark:bg-zinc-800 z-0 transition-all duration-300",
           viewMode === 'list' && "hidden md:block"
         )}>
           <MasjidSearch 
@@ -320,20 +320,14 @@ export default function MasjidFinderPage() {
                 }}
               >
                 <Popup>
-                  <div className="p-3 max-w-[240px] space-y-2">
-                    <h3 className="font-bold text-sm text-zinc-900 !m-0">{place.displayName}</h3>
+                  <div className="p-2 max-w-[200px] space-y-1.5">
+                    <h3 className="font-bold text-xs text-zinc-900 !m-0">{place.displayName}</h3>
                     {place.primaryType && (
-                      <span className="inline-block text-[10px] text-brand-emerald bg-emerald-50 px-2 py-0.5 rounded-full capitalize">
+                      <span className="inline-block text-[8px] text-brand-emerald bg-emerald-50 px-1.5 py-0.5 rounded-full capitalize">
                         {place.primaryType.replace('_', ' ')}
                       </span>
                     )}
-                    <p className="text-xs text-slate-500 leading-relaxed !m-0">{place.formattedAddress}</p>
-                    {place.rating && (
-                      <div className="flex items-center gap-1 text-amber-500 text-xs font-bold pt-1 border-t border-slate-100">
-                        <Star size={12} fill="currentColor" />
-                        {place.rating} <span className="text-slate-400 font-normal">({place.userRatingCount} reviews)</span>
-                      </div>
-                    )}
+                    <p className="text-[10px] text-slate-500 leading-tight !m-0">{place.formattedAddress}</p>
                   </div>
                 </Popup>
               </Marker>
@@ -343,65 +337,52 @@ export default function MasjidFinderPage() {
 
         {/* List View */}
         <div className={cn(
-          "w-full md:w-80 lg:w-96 flex flex-col gap-4 overflow-hidden transition-all duration-300",
+          "w-full md:w-80 lg:w-96 flex flex-col gap-3 md:gap-4 overflow-hidden transition-all duration-300",
           viewMode === 'map' && "hidden md:flex"
         )}>
-          <div className="flex-1 flex flex-col p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[2rem] shadow-sm overflow-hidden">
-            <h3 className="font-bold mb-4 flex items-center gap-2 dark:text-white shrink-0">
-              <Users size={18} className="text-brand-emerald" />
+          <div className="flex-1 flex flex-col p-3 md:p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[1.5rem] md:rounded-[2rem] shadow-sm overflow-hidden">
+            <h3 className="font-bold mb-3 md:mb-4 flex items-center gap-2 dark:text-white shrink-0 text-sm md:text-base">
+              <Users size={16} className="text-brand-emerald" />
               Nearby Masjids
             </h3>
-            <div className="flex-1 space-y-3 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="flex-1 space-y-2 overflow-y-auto pr-1 custom-scrollbar">
               {places.length > 0 ? places.map((place) => (
                 <motion.button
                   key={place.id}
-                  whileHover={{ x: 4 }}
+                  whileHover={{ x: 2 }}
                   onClick={() => handleSidebarClick(place)}
                   className={cn(
-                    "w-full text-left p-3 rounded-2xl transition-all border-2",
+                    "w-full text-left p-2.5 rounded-xl transition-all border-2",
                     selectedPlaceId === place.id 
                       ? "bg-brand-emerald/10 border-brand-emerald" 
                       : "bg-slate-50 dark:bg-zinc-800 border-transparent hover:border-slate-200 dark:hover:border-zinc-700"
                   )}
                 >
                   <p className={cn(
-                    "font-bold text-sm truncate",
+                    "font-bold text-xs md:text-sm truncate",
                     selectedPlaceId === place.id ? "text-brand-emerald" : "dark:text-zinc-200"
                   )}>
                     {place.displayName}
                   </p>
-                  <p className="text-[10px] text-slate-500 line-clamp-1">{place.formattedAddress}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    {place.rating && (
-                      <div className="flex items-center gap-1 text-[10px] text-amber-500 font-bold">
-                        <Star size={10} fill="currentColor" />
-                        {place.rating}
-                      </div>
-                    )}
-                    {place.primaryType && (
-                      <span className="text-[10px] text-slate-400 capitalize bg-slate-100 dark:bg-zinc-800 px-1.5 py-0.5 rounded">
-                        {place.primaryType.replace('_', ' ')}
-                      </span>
-                    )}
-                  </div>
+                  <p className="text-[9px] text-slate-500 line-clamp-1 opacity-70">{place.formattedAddress}</p>
                 </motion.button>
               )) : (
-                <div className="text-center py-8 space-y-2">
-                  <div className="w-12 h-12 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto text-slate-400">
-                    <Search size={24} />
+                <div className="text-center py-6 space-y-2">
+                  <div className="w-10 h-10 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto text-slate-400">
+                    <Search size={20} />
                   </div>
-                  <p className="text-xs text-slate-500">Searching for Masjids...</p>
+                  <p className="text-[10px] text-slate-500">Searching Masjids...</p>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="p-4 bg-brand-emerald text-white rounded-[2rem] shadow-lg shadow-brand-emerald/20">
-            <h3 className="font-bold text-sm mb-2 flex items-center gap-2">
-              <Clock size={16} />
+          <div className="p-3 md:p-4 bg-brand-emerald text-white rounded-[1.5rem] md:rounded-[2rem] shadow-lg shadow-emerald-500/10">
+            <h3 className="font-bold text-xs mb-1.5 flex items-center gap-2">
+              <Clock size={14} />
               Jumua Timings
             </h3>
-            <p className="text-xs opacity-90 leading-relaxed">Most Masjids in this area perform Jumua prayers at 1:15 PM and 1:30 PM. Check individual masjid notices for seasonal changes.</p>
+            <p className="text-[10px] opacity-90 leading-snug">Most Masjids perform Jumua at 1:15 & 1:30 PM. See local mosque notices for details.</p>
           </div>
         </div>
       </div>

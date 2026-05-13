@@ -35,38 +35,38 @@ export default function CollectionsPage() {
       );
 
   return (
-    <div className="space-y-8 pb-20">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-4 md:space-y-8 pb-20">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-4">
         <div>
-          <h1 className="text-3xl font-bold dark:text-white mb-1">Spiritual Library</h1>
-          <p className="text-slate-500 dark:text-slate-400 font-medium font-serif">Explore Dhikr, Swalath, and Moulid collections.</p>
+          <h1 className="text-2xl md:text-3xl font-bold dark:text-white mb-0.5 md:mb-1">Spiritual Library</h1>
+          <p className="text-xs md:text-base text-slate-500 dark:text-slate-400 font-medium font-serif opacity-80">Explore Dhikr, Swalath, and Moulid collections.</p>
         </div>
       </div>
 
       {/* Search Bar */}
       <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-brand-emerald transition-colors" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-slate-400 group-focus-within:text-brand-emerald transition-colors" />
         <input 
           type="text"
-          placeholder="Search for a specific Dhikr or Swalath..."
+          placeholder="Search collections..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-4 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/20 dark:text-white font-medium shadow-sm transition-all"
+          className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/20 dark:text-white font-medium shadow-sm transition-all text-sm md:text-base"
         />
       </div>
 
       {/* Categories Horizontal Scroll */}
-      <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar">
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 no-scrollbar -mx-4 px-4 md:mx-0 md:px-0">
         <button 
           onClick={() => { setActiveCategory(null); playSound('tap'); }}
           className={cn(
-            "px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap transition-all border",
+            "px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold text-xs md:text-sm whitespace-nowrap transition-all border",
             activeCategory === null 
-              ? "bg-brand-emerald text-white border-brand-emerald shadow-lg shadow-emerald-500/20" 
+              ? "bg-brand-emerald text-white border-brand-emerald shadow-lg shadow-emerald-500/10" 
               : "bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-brand-emerald/50"
           )}
         >
-          All Collections
+          All
         </button>
         {COLLECTIONS_CATEGORIES.map(cat => {
           const Icon = iconMap[cat.icon];
@@ -75,13 +75,13 @@ export default function CollectionsPage() {
               key={cat.id}
               onClick={() => { setActiveCategory(cat.id); playSound('tap'); }}
               className={cn(
-                "px-6 py-3 rounded-xl font-bold text-sm whitespace-nowrap flex items-center gap-2 transition-all border",
+                "px-4 md:px-6 py-2 md:py-3 rounded-lg md:rounded-xl font-bold text-xs md:text-sm whitespace-nowrap flex items-center gap-2 transition-all border",
                 activeCategory === cat.id 
-                  ? "bg-brand-emerald text-white border-brand-emerald shadow-lg shadow-emerald-500/20" 
+                  ? "bg-brand-emerald text-white border-brand-emerald shadow-lg shadow-emerald-500/10" 
                   : "bg-white dark:bg-zinc-800 text-slate-600 dark:text-zinc-400 border-slate-200 dark:border-zinc-700 hover:border-brand-emerald/50"
               )}
             >
-              <Icon className="w-4 h-4" />
+              <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
               {cat.title}
             </button>
           );
@@ -89,7 +89,7 @@ export default function CollectionsPage() {
       </div>
 
       {/* Results Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
         <AnimatePresence mode="popLayout">
           {filteredCollections.map((item, idx) => (
             <motion.div
@@ -103,22 +103,22 @@ export default function CollectionsPage() {
               <Link 
                 to={`/collections/${item.id}`}
                 onClick={() => playSound('click')}
-                className="block p-5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-3xl group hover:border-brand-emerald/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all"
+                className="block p-4 md:p-5 bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 rounded-2xl md:rounded-3xl group hover:border-brand-emerald/50 hover:shadow-xl hover:shadow-emerald-500/5 transition-all"
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-slate-50 dark:bg-zinc-900 rounded-2xl flex items-center justify-center text-brand-emerald group-hover:bg-brand-emerald group-hover:text-white transition-colors duration-300">
-                    <BookOpen className="w-6 h-6" />
+                <div className="flex items-start justify-between mb-3 md:mb-4">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 dark:bg-zinc-900 rounded-xl md:rounded-2xl flex items-center justify-center text-brand-emerald group-hover:bg-brand-emerald group-hover:text-white transition-colors duration-300">
+                    <BookOpen className="w-5 h-5 md:w-6 md:h-6" />
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-zinc-900 rounded-lg border border-slate-100 dark:border-zinc-700">
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.category}</span>
+                    <div className="flex items-center gap-1 px-2 py-0.5 md:py-1 bg-slate-50 dark:bg-zinc-900 rounded-md md:rounded-lg border border-slate-100 dark:border-zinc-700">
+                      <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.category}</span>
                     </div>
                   </div>
                 </div>
-                <h3 className="text-lg font-bold dark:text-white mb-1 group-hover:text-brand-emerald transition-colors">{item.title}</h3>
-                <div className="flex items-center gap-1 text-xs text-slate-500 dark:text-slate-400 font-medium">
-                  <span>Read Collection</span>
-                  <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                <h3 className="text-base md:text-lg font-bold dark:text-white mb-0.5 md:mb-1 group-hover:text-brand-emerald transition-colors">{item.title}</h3>
+                <div className="flex items-center gap-1 text-[10px] md:text-xs text-slate-500 dark:text-slate-400 font-medium opacity-70">
+                  <span>View Details</span>
+                  <ChevronRight className="w-2.5 h-2.5 md:w-3 md:h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
               </Link>
             </motion.div>

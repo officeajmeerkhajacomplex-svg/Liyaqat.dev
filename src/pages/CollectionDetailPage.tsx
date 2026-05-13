@@ -65,35 +65,32 @@ export default function CollectionDetailPage() {
   `;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-8 pb-32">
+    <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between sticky top-4 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-4 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-xl shadow-slate-200/20">
-        <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between sticky top-3 md:top-4 z-40 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl p-2.5 md:p-4 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-xl shadow-slate-200/10 mx-1 md:mx-0">
+        <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
           <button 
             onClick={() => { navigate('/collections'); playSound('tap'); }}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors text-slate-500"
+            className="p-1.5 md:p-2 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-lg md:rounded-xl transition-colors text-slate-500 flex-shrink-0"
           >
-            <ArrowLeft className="w-6 h-6" />
+            <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <div>
-            <h1 className="font-bold dark:text-white leading-none mb-1">{item.title}</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{item.category}</p>
+          <div className="truncate">
+            <h1 className="font-bold dark:text-white leading-none mb-1 text-sm md:text-base truncate">{item.title}</h1>
+            <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest opacity-70 truncate">{item.category}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           <button 
             onClick={() => { setShowSettings(!showSettings); playSound('click'); }}
             className={cn(
-              "p-2 rounded-xl transition-colors",
+              "p-1.5 md:p-2 rounded-lg md:rounded-xl transition-colors",
               showSettings ? "bg-brand-emerald text-white" : "text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800"
             )}
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-4.5 h-4.5 md:w-5 md:h-5" />
           </button>
-          <button className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
-            <Bookmark className="w-5 h-5" />
-          </button>
-          <button className="p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
+          <button className="hidden sm:block p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-xl transition-colors">
             <Share2 className="w-5 h-5" />
           </button>
         </div>
@@ -102,40 +99,30 @@ export default function CollectionDetailPage() {
       {/* Settings Panel */}
       <motion.div
         animate={{ height: showSettings ? 'auto' : 0, opacity: showSettings ? 1 : 0 }}
-        className="overflow-hidden bg-slate-50 dark:bg-zinc-800/50 rounded-3xl border border-slate-200 dark:border-zinc-800"
+        className="overflow-hidden bg-slate-50 dark:bg-zinc-800/50 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-zinc-800 mx-1 md:mx-0"
       >
-        <div className="p-6 space-y-6">
+        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
           <div className="flex items-center justify-between">
-            <span className="font-bold dark:text-white flex items-center gap-2">
-              <Type className="w-4 h-4 text-brand-emerald" /> Text Size
+            <span className="font-bold text-sm md:text-base dark:text-white flex items-center gap-2">
+              <Type className="w-4 h-4 text-brand-emerald" /> Font Size
             </span>
-            <div className="flex items-center gap-4">
-              <button onClick={() => setFontSize(Math.max(16, fontSize - 4))} className="p-2 px-4 bg-white dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 font-bold">-</button>
-              <span className="font-mono font-bold dark:text-white">{fontSize}px</span>
-              <button onClick={() => setFontSize(Math.min(48, fontSize + 4))} className="p-2 px-4 bg-white dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 font-bold">+</button>
+            <div className="flex items-center gap-3 md:gap-4">
+              <button onClick={() => setFontSize(Math.max(16, fontSize - 2))} className="w-8 h-8 md:w-10 md:h-10 bg-white dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 font-bold text-sm">-</button>
+              <span className="font-mono font-bold dark:text-white text-sm md:text-base">{fontSize}px</span>
+              <button onClick={() => setFontSize(Math.min(48, fontSize + 2))} className="w-8 h-8 md:w-10 md:h-10 bg-white dark:bg-zinc-800 rounded-lg border border-slate-200 dark:border-zinc-700 font-bold text-sm">+</button>
             </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="font-bold dark:text-white flex items-center gap-2">
-              <Volume2 className="w-4 h-4 text-brand-emerald" /> Audio Recitation
-            </span>
-            <span className="text-xs text-slate-500 font-bold uppercase tracking-wider">Coming Soon</span>
           </div>
         </div>
       </motion.div>
 
       {/* Hero Icon */}
-      <div className="flex flex-col items-center justify-center p-12 text-center">
-        <div className="w-24 h-24 bg-brand-emerald/10 text-brand-emerald rounded-[2.5rem] flex items-center justify-center mb-6 animate-pulse">
-           <BookOpen className="w-12 h-12" />
+      <div className="flex flex-col items-center justify-center p-6 md:p-12 text-center">
+        <div className="w-16 h-16 md:w-24 md:h-24 bg-brand-emerald/10 text-brand-emerald rounded-2xl md:rounded-[2.5rem] flex items-center justify-center mb-4 md:mb-6">
+           <BookOpen className="w-8 h-8 md:w-12 md:h-12" />
         </div>
-        <h2 className="text-3xl font-bold dark:text-white font-serif mb-2">{item.title}</h2>
-        <div className="flex items-center gap-3">
-          <span className="px-3 py-1 bg-slate-100 dark:bg-zinc-800/50 text-slate-500 rounded-full text-xs font-bold uppercase tracking-widest">{item.category}</span>
-          <div className="flex items-center gap-1 text-slate-400">
-            <Heart className="w-4 h-4 fill-brand-emerald text-brand-emerald opacity-20" />
-            <span className="text-xs font-medium">Favorite of many</span>
-          </div>
+        <h2 className="text-xl md:text-3xl font-bold dark:text-white font-serif mb-1 md:mb-2">{item.title}</h2>
+        <div className="flex items-center gap-2 md:gap-3">
+          <span className="px-2 py-0.5 bg-slate-100 dark:bg-zinc-800/50 text-slate-500 rounded-full text-[9px] md:text-xs font-bold uppercase tracking-widest">{item.category}</span>
         </div>
       </div>
 

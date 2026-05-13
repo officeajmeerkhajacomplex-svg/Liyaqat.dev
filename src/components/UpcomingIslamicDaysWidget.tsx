@@ -162,7 +162,7 @@ export default function UpcomingIslamicDaysWidget() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-3">
+      <div className="grid grid-cols-1 gap-2.5">
         <AnimatePresence mode="popLayout">
           {events.map((event, idx) => (
             <motion.div
@@ -170,7 +170,7 @@ export default function UpcomingIslamicDaysWidget() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: idx * 0.1 }}
-              className="group relative p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-[2rem] shadow-sm hover:border-brand-emerald/50 transition-all overflow-hidden"
+              className="group relative p-3 md:p-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl md:rounded-[2rem] shadow-sm hover:border-brand-emerald/50 transition-all overflow-hidden"
             >
               {/* Glow Effect */}
               <div className={cn(
@@ -180,20 +180,20 @@ export default function UpcomingIslamicDaysWidget() {
                 event.color === 'blue' ? "bg-blue-500" : "bg-indigo-500"
               )} />
 
-              <div className="flex items-center gap-4 relative z-10">
+              <div className="flex items-center gap-3 relative z-10">
                 <div className={cn(
-                  "w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-lg",
+                  "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shrink-0",
                   event.color === 'emerald' ? "bg-brand-emerald shadow-emerald-500/20" : 
                   event.color === 'gold' ? "bg-brand-gold shadow-amber-500/20" :
                   event.color === 'blue' ? "bg-blue-500 shadow-blue-500/20" : 
                   "bg-indigo-500 shadow-indigo-500/20"
                 )}>
-                  <event.icon className="w-6 h-6" />
+                  <event.icon className="w-5 h-5 md:w-6 md:h-6" />
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-bold dark:text-white truncate">{event.name}</h4>
-                  <div className="flex items-center gap-2 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                  <h4 className="font-bold text-sm md:text-base dark:text-white truncate">{event.name}</h4>
+                  <div className="flex items-center gap-2 text-[9px] md:text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
                     <span>{event.hijriDay} {event.hMonthName}</span>
                     <span className="w-1 h-1 bg-slate-300 rounded-full" />
                     <span>{format(event.gDate, 'dd MMM yyyy')}</span>
@@ -202,14 +202,14 @@ export default function UpcomingIslamicDaysWidget() {
 
                 <div className="text-right">
                   <div className={cn(
-                    "px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight",
+                    "px-2 py-0.5 md:px-3 md:py-1 rounded-full text-[9px] md:text-[10px] font-bold uppercase tracking-tight",
                     event.daysLeft === 0 ? "bg-brand-emerald text-white shadow-lg shadow-emerald-500/20" :
                     event.daysLeft === 1 ? "bg-amber-100 text-amber-700 dark:bg-amber-950/30 dark:text-amber-400" :
                     "bg-slate-50 dark:bg-zinc-800 text-slate-500 border border-slate-100 dark:border-zinc-700"
                   )}>
                     {event.daysLeft === 0 ? 'Tonight' : 
                      event.daysLeft === 1 ? 'Tomorrow' : 
-                     `In ${event.daysLeft} days`}
+                     `In ${event.daysLeft}d`}
                   </div>
                 </div>
               </div>

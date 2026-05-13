@@ -18,7 +18,9 @@ import {
   Music,
   Moon,
   Sun,
-  Calendar
+  Calendar,
+  MapPin,
+  Users
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { usePrayerStore } from '../store/usePrayerStore';
@@ -66,77 +68,74 @@ export default function Dashboard() {
 
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 md:space-y-8">
       {/* Header / Greeting */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-slate-200/50 dark:border-zinc-800/50">
-        <div className="flex items-center gap-5">
-           <Link to="/profile" className="relative group">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-slate-200/50 dark:border-zinc-800/50">
+        <div className="flex items-center gap-4">
+           <Link to="/profile" className="relative group shrink-0">
               <div 
                 style={{ backgroundColor: profile?.avatarColor || '#10B981' }}
-                className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/10 group-hover:scale-105 transition-transform"
+                className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/10 group-hover:scale-105 transition-transform"
               >
-                <IconComponent size={28} />
+                <IconComponent size={24} className="md:w-7 md:h-7" />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-brand-gold text-white rounded-lg border-2 border-slate-50 dark:border-brand-black flex items-center justify-center shadow-md">
-                <Heart size={10} className="fill-current" />
+              <div className="absolute -bottom-1 -right-1 w-5 h-5 md:w-6 md:h-6 bg-brand-gold text-white rounded-lg border-2 border-slate-50 dark:border-brand-black flex items-center justify-center shadow-md">
+                <Heart size={8} className="md:w-2.5 md:h-2.5 fill-current" />
               </div>
            </Link>
-            <div>
-              <h1 className="text-3xl font-bold dark:text-white leading-tight">
+            <div className="min-w-0">
+              <h1 className="text-xl md:text-3xl font-bold dark:text-white leading-tight truncate">
                 As-salamu alaykum, <span className="text-brand-emerald">{profile?.displayName || 'Seeker'}</span>
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">May your day be filled with barakah.</p>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-xs md:text-sm mt-0.5">May your day be filled with barakah.</p>
             </div>
         </div>
-        <div className="flex items-center gap-3 self-start md:self-center">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm">
-            <Clock className="w-4 h-4 text-brand-gold" />
-            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{hijriDate || 'Loading...'}</span>
+        <div className="flex items-center gap-2 self-start md:self-center">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-800 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-sm">
+            <Clock className="w-3.5 h-3.5 text-brand-gold" />
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{hijriDate || 'Loading...'}</span>
           </div>
-          <Link to="/profile" className="p-2.5 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm md:hidden">
-            <User className="w-5 h-5 text-slate-500" />
+          <Link to="/profile" className="p-2 bg-white dark:bg-zinc-800 rounded-xl border border-slate-200 dark:border-zinc-700 shadow-sm md:hidden">
+            <User className="w-4 h-4 text-slate-500" />
           </Link>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
         {/* Main Column */}
-        <div className="lg:col-span-2 space-y-8">
-          {/* Prayer Card */}
-          <PrayerCountdownCard onSettingsClick={() => navigate('/prayer-times')} />
-
-          {/* Verse of the Day Card */}
+        <div className="lg:col-span-2 space-y-6 md:space-y-8">
+          {/* Verse of the Day Card - Small & Top */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-8 bg-brand-emerald text-white rounded-[2rem] relative overflow-hidden shadow-2xl shadow-emerald-500/20"
+            className="p-4 md:p-5 bg-brand-emerald text-white rounded-xl md:rounded-2xl relative overflow-hidden shadow-lg shadow-emerald-500/10"
           >
             {/* Background Pattern */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32" />
+            <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-white/10 rounded-full blur-2xl -mr-16 -mt-16 md:-mr-24 md:-mt-24" />
             
             <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-8 bg-white/20 w-max px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">
-                <Sparkles className="w-3 h-3" />
+              <div className="flex items-center gap-2 mb-3 md:mb-4 bg-white/20 w-max px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold tracking-wider uppercase">
+                <Sparkles className="w-2.5 h-2.5" />
                 <span>Verse of the Day</span>
               </div>
 
               {loadingVerse ? (
-                <div className="space-y-4 animate-pulse">
-                  <div className="h-4 bg-white/20 rounded w-3/4" />
-                  <div className="h-4 bg-white/20 rounded w-1/2" />
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-3 bg-white/20 rounded w-3/4" />
+                  <div className="h-3 bg-white/20 rounded w-1/2" />
                 </div>
               ) : (
-                <div className="space-y-6">
-                  <p className="text-3xl md:text-4xl font-arabic text-right leading-relaxed mb-6">
+                <div className="space-y-3 md:space-y-4">
+                  <p className="text-lg md:text-2xl font-arabic text-right leading-relaxed">
                     {verse?.arabic}
                   </p>
-                  <p className="text-lg md:text-xl text-emerald-50 font-serif italic italic leading-relaxed">
+                  <p className="text-xs md:text-sm text-emerald-50 font-serif italic leading-relaxed">
                     "{verse?.translation}"
                   </p>
-                  <div className="flex items-center justify-between pt-4 border-t border-white/20">
-                    <span className="font-semibold">{verse?.surah} {verse?.number}</span>
-                    <button className="p-2 bg-white/20 rounded-full hover:bg-white/30 transition-colors">
-                      <Bookmark className="w-5 h-5" />
+                  <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                    <span className="text-[10px] md:text-xs font-semibold">{verse?.surah} {verse?.number}</span>
+                    <button className="p-1 md:p-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition-colors">
+                      <Bookmark className="w-3.5 md:w-4 h-3.5 md:h-4" />
                     </button>
                   </div>
                 </div>
@@ -144,48 +143,78 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* Featured Sections Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          {/* Featured Sections Grid - Now below Verse */}
+          <div className="grid grid-cols-2 gap-3 md:gap-6">
             <ActionCard 
               to="/collections"
               icon={Library}
-              title="Spiritual Library"
-              desc="Dhikr, Swalath & Moulid collections."
+              title="Library"
+              desc="Collections"
               color="emerald"
             />
             <ActionCard 
               to="/chat"
               icon={MessageSquare}
-              title="DeenFlow AI"
-              desc="Ask questions about Islam and get citations."
+              title="Deen AI"
+              desc="Ask DeenFlow"
               color="gold"
             />
             <ActionCard 
               to="/quran"
               icon={BookOpen}
-              title="Quran Reader"
-              desc="Read, listen and understand the Quran."
+              title="Quran"
+              desc="Read & Listen"
               color="emerald"
             />
+            <ActionCard 
+              to="/masjids"
+              icon={MapPin}
+              title="Masjids"
+              desc="Nearby Masjids"
+              color="gold"
+            />
+            <ActionCard 
+              to="/qibla"
+              icon={Compass}
+              title="Qibla"
+              desc="Facing Kaaba"
+              color="emerald"
+            />
+            <ActionCard 
+              to="/tasbeeh"
+              icon={Zap}
+              title="Tasbeeh"
+              desc="Digital Dhikr"
+              color="gold"
+            />
+            <ActionCard 
+              to="/messages"
+              icon={Users}
+              title="Social"
+              desc="Spiritual Circle"
+              color="emerald"
+              className="col-span-2"
+            />
           </div>
-        </div>
 
-        {/* Sidebar Column */}
+          {/* Prayer Card - Moved below grid */}
+          <PrayerCountdownCard onSettingsClick={() => navigate('/prayer-times')} />
+        </div>
         <div className="space-y-8">
           {/* Upcoming Islamic Days Widget */}
           <UpcomingIslamicDaysWidget />
           
           {/* Daily Reminder */}
-          <div className="p-6 bg-slate-900 text-white rounded-[2rem] relative overflow-hidden">
+          <div className="p-5 md:p-6 bg-slate-900 text-white rounded-2xl md:rounded-[2rem] relative overflow-hidden">
             <div className="relative z-10">
-              <h4 className="font-bold mb-2">Remind yourself</h4>
-              <p className="text-sm text-slate-400 mb-4">"The best of people are those that bring most benefit to others."</p>
-              <button className="text-xs font-bold text-brand-emerald flex items-center gap-1 hover:underline">
+              <h4 className="font-bold mb-1.5 md:mb-2 text-sm md:text-base">Remind yourself</h4>
+              <p className="text-xs md:text-sm text-slate-400 mb-3 md:mb-4 leading-relaxed font-serif italic">"The best of people are those that bring most benefit to others."</p>
+              <button className="text-[10px] md:text-xs font-bold text-brand-emerald flex items-center gap-1 hover:underline uppercase tracking-wider">
                 View all reminders <ChevronRight className="w-3 h-3" />
               </button>
             </div>
             <div className="absolute bottom-0 right-0 p-2 opacity-10">
-              <Sparkles className="w-12 h-12" />
+              <Sparkles className="w-10 md:w-12 h-10 md:h-12" />
             </div>
           </div>
         </div>
@@ -194,21 +223,24 @@ export default function Dashboard() {
   );
 }
 
-function ActionCard({ to, icon: Icon, title, desc, color }: any) {
+function ActionCard({ to, icon: Icon, title, desc, color, className }: any) {
   return (
-    <Link to={to}>
+    <Link to={to} className={className}>
       <motion.div 
-        whileHover={{ y: -5 }}
-        className="p-6 bg-white dark:bg-zinc-800 rounded-3xl border border-slate-200 dark:border-zinc-700 shadow-sm group hover:border-brand-emerald/50 transition-all"
+        whileHover={{ y: -3 }}
+        whileTap={{ scale: 0.98 }}
+        className="p-4 md:p-6 bg-white dark:bg-zinc-800 rounded-2xl md:rounded-3xl border border-slate-200 dark:border-zinc-700 shadow-sm group hover:border-brand-emerald/50 transition-all flex flex-col items-center md:items-start text-center md:text-left h-full"
       >
         <div className={cn(
-          "w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110",
+          "w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center mb-3 md:mb-4 transition-transform group-hover:scale-110 shrink-0",
           color === 'emerald' ? "bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600" : "bg-amber-100 dark:bg-amber-950/50 text-amber-600"
         )}>
-          <Icon className="w-6 h-6" />
+          <Icon className="w-5 h-5 md:w-6 md:h-6" />
         </div>
-        <h3 className="font-bold text-xl mb-1 dark:text-white">{title}</h3>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{desc}</p>
+        <div>
+          <h3 className="font-bold text-base md:text-xl mb-0.5 md:mb-1 dark:text-white leading-tight">{title}</h3>
+          <p className="text-[10px] md:text-sm text-slate-500 dark:text-slate-400 font-medium">{desc}</p>
+        </div>
       </motion.div>
     </Link>
   );

@@ -125,28 +125,27 @@ export default function SocialMessagesPage() {
         activeChatId ? "hidden md:flex" : "flex flex-1"
       )}>
         <div className="p-4 md:p-6 pb-2 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between">
-          <h1 className="text-2xl font-bold dark:text-white flex items-center gap-2">
+          <h1 className="text-xl md:text-2xl font-bold dark:text-white flex items-center gap-2">
             Messages
             <ShieldCheck className="w-5 h-5 text-brand-emerald" />
           </h1>
           <button 
             onClick={() => { setShowNewChat(true); playSound('click'); }}
-            className="p-2 md:p-3 bg-brand-emerald hover:bg-emerald-600 text-white rounded-full transition-colors shadow-lg shadow-emerald-500/20"
+            className="p-2.5 bg-brand-emerald hover:bg-emerald-600 text-white rounded-full transition-colors shadow-lg shadow-emerald-500/20"
           >
-            <Edit className="w-5 h-5" />
+            <Edit className="w-4 h-4 md:w-5 md:h-5" />
           </button>
         </div>
         
-        {/* Search */}
-        <div className="px-4 py-3">
+        <div className="px-4 py-2 md:py-3">
           <div className="relative">
-            <Search className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
             <input 
               type="text"
-              placeholder="Search encrypted chats..."
+              placeholder="Search chats..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white transition-all shadow-sm font-medium"
+              className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-800 rounded-xl border border-slate-200 dark:border-zinc-700 focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white transition-all shadow-sm font-medium text-sm"
             />
           </div>
         </div>
@@ -168,7 +167,7 @@ export default function SocialMessagesPage() {
                 key={chat.id}
                 onClick={() => { setActiveChat(chat.id); playSound('tap'); }}
                 className={cn(
-                  "w-full flex items-center gap-4 p-3 rounded-2xl transition-all text-left",
+                  "w-full flex items-center gap-3 md:gap-4 p-2.5 md:p-3 rounded-2xl transition-all text-left",
                   activeChatId === chat.id 
                     ? "bg-white dark:bg-zinc-800 shadow-sm border border-slate-200 dark:border-zinc-700/50" 
                     : "hover:bg-white dark:hover:bg-zinc-800/80 border border-transparent"
@@ -176,10 +175,10 @@ export default function SocialMessagesPage() {
               >
                 <div className="relative flex-shrink-0">
                   {avatar ? (
-                     <img src={avatar} alt={name} className="w-12 h-12 rounded-full object-cover border-2 border-white dark:border-zinc-800 bg-slate-100 dark:bg-zinc-700" />
+                     <img src={avatar} alt={name} className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-white dark:border-zinc-800 bg-slate-100 dark:bg-zinc-700" />
                   ) : (
-                     <div className="w-12 h-12 rounded-full bg-slate-200 dark:bg-zinc-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold border-2 border-white dark:border-zinc-800">
-                       {name?.[0]?.toUpperCase() || <Users className="w-5 h-5"/>}
+                     <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-slate-200 dark:bg-zinc-700 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold border-2 border-white dark:border-zinc-800 text-sm">
+                       {name?.[0]?.toUpperCase() || <Users className="w-4 h-4 md:w-5 md:h-5"/>}
                      </div>
                   )}
                   {isGroup ? (
@@ -226,23 +225,23 @@ export default function SocialMessagesPage() {
       {activeChatId && activeChat ? (
         <div className="flex-1 flex flex-col bg-white dark:bg-[#0a0a0a] relative z-10 w-full h-full">
           {/* Header */}
-          <div className="p-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-[#0a0a0a] sticky top-0 z-20">
-             <div className="flex items-center gap-3">
+          <div className="px-4 py-2.5 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-white dark:bg-[#0a0a0a] sticky top-0 z-20">
+             <div className="flex items-center gap-2.5 md:gap-3">
                 <button 
                   onClick={() => { setActiveChat(null); playSound('tap'); }}
-                  className="md:hidden p-2 -ml-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full"
+                  className="md:hidden p-1.5 -ml-1 text-slate-500 hover:bg-slate-100 dark:hover:bg-zinc-800 rounded-full"
                 >
-                  <ChevronLeft className="w-6 h-6" />
+                  <ChevronLeft className="w-5 h-5 md:w-6 md:h-6" />
                 </button>
                 {/* Active Chat Info */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 md:gap-3">
                   <div className="relative">
                     {activeChat?.type === 'group' ? (
-                       <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-brand-emerald">
-                         <Users className="w-5 h-5"/>
+                       <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-brand-emerald">
+                         <Users className="w-4.5 h-4.5 md:w-5 md:h-5"/>
                        </div>
                     ) : (
-                       <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center text-slate-500 font-bold overflow-hidden">
+                       <div className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-slate-200 dark:bg-zinc-800 flex items-center justify-center text-slate-500 font-bold overflow-hidden text-sm">
                          {activeChat?.otherParticipant?.photoURL ? (
                            <img src={activeChat.otherParticipant.photoURL} alt="" className="w-full h-full object-cover" />
                          ) : (
@@ -251,14 +250,14 @@ export default function SocialMessagesPage() {
                        </div>
                     )}
                     {activeChat && activeChat.type === 'direct' && activeChat.otherParticipant?.isOnline && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#0a0a0a]"></div>
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 md:w-3 md:h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#0a0a0a]"></div>
                     )}
                   </div>
                   <div>
-                    <h3 className="font-bold text-slate-800 dark:text-white leading-tight">
+                    <h3 className="font-bold text-sm md:text-base text-slate-800 dark:text-white leading-tight">
                       {activeChat?.type === 'group' ? activeChat.name : activeChat?.otherParticipant?.displayName}
                     </h3>
-                    <p className="text-xs text-brand-emerald font-medium flex items-center gap-1">
+                    <p className="text-[9px] md:text-xs text-brand-emerald font-medium flex items-center gap-1 leading-none mt-0.5">
                       {activeChat && getOnlineStatusText(activeChat)}
                     </p>
                   </div>
@@ -268,9 +267,9 @@ export default function SocialMessagesPage() {
              <div className="relative">
                <button 
                  onClick={() => setShowChatOptions(!showChatOptions)}
-                 className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
+                 className="p-1.5 md:p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-full hover:bg-slate-100 dark:hover:bg-zinc-800"
                >
-                 <MoreVertical className="w-5 h-5" />
+                 <MoreVertical className="w-4.5 h-4.5 md:w-5 md:h-5" />
                </button>
                <AnimatePresence>
                  {showChatOptions && activeChat && (
@@ -409,33 +408,33 @@ export default function SocialMessagesPage() {
           </div>
 
           {/* Sticky Input Area */}
-          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-t border-slate-100 dark:border-zinc-800 z-20">
+          <div className="absolute bottom-0 left-0 right-0 p-3 md:p-4 bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur-xl border-t border-slate-100 dark:border-zinc-800 z-20 pb-[env(safe-area-inset-bottom)]">
             {replyToId && replyToMsg && (
-              <div className="flex items-center justify-between bg-slate-100 dark:bg-zinc-900 rounded-t-2xl -mx-4 -mt-4 px-4 py-2 border-b border-slate-200 dark:border-zinc-800">
-                <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-zinc-400 truncate">
-                  <CornerUpLeft className="w-4 h-4 text-brand-emerald" />
-                  <span className="font-bold">{replyToMsg.senderId === user?.uid ? 'Replying to yourself' : 'Replying'}</span>
+              <div className="flex items-center justify-between bg-slate-100 dark:bg-zinc-900 rounded-t-xl -mx-3 -mt-3 px-4 py-1.5 border-b border-slate-200 dark:border-zinc-800">
+                <div className="flex items-center gap-2 text-[10px] md:text-xs text-slate-600 dark:text-zinc-400 truncate">
+                  <CornerUpLeft className="w-3.5 h-3.5 text-brand-emerald" />
+                  <span className="font-bold">{replyToMsg.senderId === user?.uid ? 'Replying to self' : 'Replying'}</span>
                   <span className="truncate opacity-70">: {replyToMsg.decryptedText}</span>
                 </div>
-                <button onClick={() => setReplyToId(null)} className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-full">✕</button>
+                <button onClick={() => setReplyToId(null)} className="p-1 hover:bg-slate-200 dark:hover:bg-zinc-800 rounded-full text-xs">✕</button>
               </div>
             )}
             <form onSubmit={handleSend} className="flex gap-2">
               <div className="flex-1 relative">
                 <input 
                   type="text"
-                  placeholder="Type an encrypted message..."
+                  placeholder="Type a message..."
                   value={messageInput}
                   onChange={handleInputChange}
-                  className="w-full bg-slate-100 dark:bg-zinc-900 rounded-full pl-6 pr-12 py-3.5 focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white"
+                  className="w-full bg-slate-100 dark:bg-zinc-900 rounded-2xl md:rounded-full pl-5 pr-10 py-3 md:py-3.5 focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 dark:text-white text-xs md:text-sm font-medium"
                 />
               </div>
               <button 
                 type="submit"
                 disabled={!messageInput.trim()}
-                className="w-14 h-[52px] flex items-center justify-center bg-brand-emerald text-white rounded-full disabled:opacity-50 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20"
+                className="w-11 h-11 md:w-14 md:h-[52px] flex items-center justify-center bg-brand-emerald text-white rounded-2xl md:rounded-full disabled:opacity-50 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-emerald-500/20"
               >
-                <Send className="w-5 h-5 -ml-1" />
+                <Send className="w-4.5 h-4.5 md:w-5 md:h-5 md:-ml-1" />
               </button>
             </form>
           </div>

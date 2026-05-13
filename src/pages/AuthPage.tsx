@@ -135,16 +135,16 @@ export default function AuthPage() {
       </div>
 
       {/* Right Pane - Form */}
-      <div className="flex flex-col items-center justify-center p-6 md:p-12">
+      <div className="flex flex-col items-center justify-center p-4 md:p-12">
         <div className="w-full max-w-md">
-          <div className="text-center mb-10">
-            <div className="w-16 h-16 overflow-hidden mx-auto mb-6">
+          <div className="text-center mb-8 md:mb-10">
+            <div className="w-12 h-12 md:w-16 md:h-16 overflow-hidden mx-auto mb-4 md:mb-6">
               <img src="/favicon.svg" alt="DeenFlow Logo" className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-3xl font-bold mb-2">
+            <h1 className="text-2xl md:text-3xl font-bold mb-1 md:mb-2">
               {isLogin ? 'Welcome Back' : 'Join DeenFlow'}
             </h1>
-            <p className="text-slate-500 dark:text-slate-400">
+            <p className="text-sm md:text-base text-slate-500 dark:text-slate-400">
               {isLogin ? 'Continue your spiritual journey' : 'Start your spiritual journey today'}
             </p>
           </div>
@@ -153,7 +153,7 @@ export default function AuthPage() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="w-full flex items-center justify-center gap-3 py-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl font-bold mb-6 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all shadow-sm"
+            className="w-full flex items-center justify-center gap-3 py-3.5 md:py-4 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl md:rounded-2xl font-bold mb-5 md:mb-6 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all shadow-sm text-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -164,9 +164,9 @@ export default function AuthPage() {
             Continue with Google
           </button>
 
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-4 mb-5 md:mb-6">
             <div className="h-[1px] flex-1 bg-slate-100 dark:bg-zinc-800" />
-            <span className="text-xs font-bold text-slate-400 uppercase">Or continue with email</span>
+            <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider">Or continue with email</span>
             <div className="h-[1px] flex-1 bg-slate-100 dark:bg-zinc-800" />
           </div>
 
@@ -174,7 +174,7 @@ export default function AuthPage() {
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-2xl text-sm mb-6 border border-red-100 dark:border-red-900/50"
+              className="p-3.5 md:p-4 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 rounded-xl md:rounded-2xl text-[13px] md:text-sm mb-5 md:mb-6 border border-red-100 dark:border-red-900/50"
             >
               {error}
               {error.includes('Firebase Console') && (
@@ -190,10 +190,10 @@ export default function AuthPage() {
             </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Display Name</label>
+                <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2 ml-1 text-slate-600 dark:text-slate-400">Display Name</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -201,18 +201,15 @@ export default function AuthPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="DeenSeeker"
-                    className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium"
+                    className="w-full pl-11 md:pl-12 pr-4 py-3 md:py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium text-sm"
                   />
-                  <div className={cn("absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400", !loading && "hidden")}>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  </div>
-                  {!loading && <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />}
+                  {!loading && <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-slate-400" />}
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Email Address</label>
+              <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2 ml-1 text-slate-600 dark:text-slate-400">Email Address</label>
               <div className="relative">
                 <input
                   type="email"
@@ -220,14 +217,14 @@ export default function AuthPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium"
+                  className="w-full pl-11 md:pl-12 pr-4 py-3 md:py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium text-sm"
                 />
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-slate-400" />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Password</label>
+              <label className="block text-xs md:text-sm font-bold mb-1.5 md:mb-2 ml-1 text-slate-600 dark:text-slate-400">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -235,15 +232,15 @@ export default function AuthPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-12 py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium"
+                  className="w-full pl-11 md:pl-12 pr-11 md:pr-12 py-3 md:py-4 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-brand-emerald/50 transition-all font-medium text-sm"
                 />
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 md:w-5 h-4 md:h-5 text-slate-400" />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? <EyeOff className="w-4 md:w-5 h-4 md:h-5" /> : <Eye className="w-4 md:w-5 h-4 md:h-5" />}
                 </button>
               </div>
             </div>
@@ -251,7 +248,7 @@ export default function AuthPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-brand-emerald text-white rounded-2xl font-bold shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2"
+              className="w-full py-3.5 md:py-4 bg-brand-emerald text-white rounded-xl md:rounded-2xl font-bold shadow-lg shadow-emerald-500/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-70 disabled:cursor-not-allowed mt-2 flex items-center justify-center gap-2 text-sm md:text-base"
             >
               {loading && <Loader2 className="w-5 h-5 animate-spin" />}
               {isLogin ? 'Sign In' : 'Create Account'}
@@ -261,7 +258,7 @@ export default function AuthPage() {
           <div className="mt-8 text-center">
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-brand-emerald font-semibold hover:underline"
+              className="text-brand-emerald font-bold text-sm hover:underline"
             >
               {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
             </button>
