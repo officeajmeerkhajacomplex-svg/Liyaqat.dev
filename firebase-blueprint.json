@@ -67,12 +67,70 @@
         "timestamp": { "type": "string", "format": "date-time" }
       },
       "required": ["id", "userId", "count", "label", "timestamp"]
+    },
+    "PublicProfile": {
+      "title": "Public Profile",
+      "description": "Publicly readable profile and encryption keys",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "publicKey": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "publicKey"]
+    },
+    "SocialChat": {
+      "title": "Social Chat",
+      "description": "Metadata for a direct message or group chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["direct", "group"] },
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "name": { "type": "string" },
+        "groupImage": { "type": "string" },
+        "adminIds": { "type": "array", "items": { "type": "string" } },
+        "lastMessageAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "participants", "lastMessageAt", "createdAt"]
+    },
+    "SocialMessage": {
+      "title": "Social Message",
+      "description": "An encrypted message in a social chat",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "encryptedMessage": { "type": "string" },
+        "encryptedKeys": { "type": "object" },
+        "iv": { "type": "string" },
+        "messageType": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "seenBy": { "type": "array", "items": { "type": "string" } },
+        "replyTo": { "type": "string" }
+      },
+      "required": ["id", "senderId", "encryptedMessage", "encryptedKeys", "iv", "timestamp", "seenBy"]
     }
   },
   "firestore": {
     "/users/{userId}": {
       "schema": "User",
       "description": "User profile data"
+    },
+    "/public_profiles/{userId}": {
+      "schema": "PublicProfile",
+      "description": "Public user profiles with public keys"
+    },
+    "/social_chats/{chatId}": {
+      "schema": "SocialChat",
+      "description": "Groups and direct message chats"
+    },
+    "/social_chats/{chatId}/messages/{messageId}": {
+      "schema": "SocialMessage",
+      "description": "Encrypted messages within a chat"
     },
     "/users/{userId}/chats/{chatId}": {
       "schema": "Chat",

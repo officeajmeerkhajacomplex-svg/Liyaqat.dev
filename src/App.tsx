@@ -22,6 +22,7 @@ import CollectionsPage from './pages/CollectionsPage';
 import CollectionDetailPage from './pages/CollectionDetailPage';
 import TasbeehPage from './pages/TasbeehPage';
 import MasjidFinderPage from './pages/MasjidFinderPage';
+import SocialMessagesPage from './pages/SocialMessagesPage';
 
 // Layouts
 import MainLayout from './layouts/MainLayout';
@@ -59,6 +60,7 @@ export default function App() {
           </ProtectedRoute>
         }>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="messages" element={<SocialMessagesPage />} />
           <Route path="chat" element={<ChatPage />} />
           <Route path="chat/:chatId" element={<ChatPage />} />
           <Route path="quran" element={<QuranPage />} />

@@ -110,12 +110,6 @@ export default function CollectionsPage() {
                     <BookOpen className="w-6 h-6" />
                   </div>
                   <div className="flex items-center gap-2">
-                    {item.isPro && (
-                      <div className="px-2 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-lg border border-amber-200 dark:border-amber-900/50 flex items-center gap-1">
-                        <Sparkles className="w-3 h-3" />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">PRO</span>
-                      </div>
-                    )}
                     <div className="flex items-center gap-1 px-2 py-1 bg-slate-50 dark:bg-zinc-900 rounded-lg border border-slate-100 dark:border-zinc-700">
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{item.category}</span>
                     </div>

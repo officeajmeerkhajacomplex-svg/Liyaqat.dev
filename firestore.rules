@@ -69,10 +69,69 @@ service cloud.firestore {
              data.timestamp == request.time;
     }
 
+    function isValidPublicProfile(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'publicKey']) &&
+             data.uid == request.auth.uid &&
+             data.displayName is string && data.displayName.size() <= 100 &&
+             data.publicKey is string && data.publicKey.size() <= 5000 &&
+             (data.get('photoURL', null) == null || data.photoURL is string) &&
+             (data.get('updatedAt', null) == null || data.updatedAt == request.time);
+    }
+
+    function isValidSocialChat(data) {
+      return data.keys().hasAll(['type', 'participants', 'lastMessageAt', 'createdAt']) &&
+             data.type in ['direct', 'group'] &&
+             data.participants is list && data.participants.size() > 0 && data.participants.size() <= 100 &&
+             request.auth.uid in data.participants &&
+             (data.get('name', null) == null || data.name is string) &&
+             (data.get('groupImage', null) == null || data.groupImage is string) &&
+             (data.get('adminIds', null) == null || data.adminIds is list) &&
+             data.createdAt == request.time;
+    }
+
+    function isValidSocialMessage(data) {
+      return data.keys().hasAll(['senderId', 'encryptedMessage', 'encryptedKeys', 'iv', 'timestamp', 'seenBy']) &&
+             data.senderId == request.auth.uid &&
+             data.encryptedMessage is string && data.encryptedMessage.size() <= 20000 &&
+             data.encryptedKeys is map && data.encryptedKeys.size() <= 100 &&
+             data.iv is string && data.iv.size() <= 100 &&
+             data.timestamp == request.time &&
+             data.seenBy is list && data.seenBy.size() <= 100 &&
+             (data.get('replyTo', null) == null || data.replyTo is string) &&
+             (data.get('messageType', null) == null || data.messageType is string);
+    }
+
     // --- Collections ---
 
     match /test/connection {
       allow get: if true;
+    }
+
+    match /public_profiles/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn();
+      allow create: if isOwner(userId) && isValidPublicProfile(incoming());
+      allow update: if isOwner(userId) && 
+                      incoming().uid == existing().uid &&
+                      incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'publicKey', 'updatedAt']);
+    }
+
+    match /social_chats/{chatId} {
+      allow get: if isSignedIn() && request.auth.uid in existing().participants;
+      allow list: if isSignedIn() && request.auth.uid in existing().participants;
+      allow create: if isSignedIn() && isValidSocialChat(incoming());
+      allow update: if isSignedIn() && request.auth.uid in existing().participants &&
+                      incoming().diff(existing()).affectedKeys().hasOnly(['lastMessageAt', 'name', 'groupImage', 'participants', 'adminIds']);
+      allow delete: if isSignedIn() && request.auth.uid in existing().participants;
+
+      match /messages/{messageId} {
+        allow get: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/social_chats/$(chatId)).data.participants;
+        allow list: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/social_chats/$(chatId)).data.participants;
+        allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/social_chats/$(chatId)).data.participants && isValidSocialMessage(incoming());
+        allow update: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/social_chats/$(chatId)).data.participants &&
+                        incoming().diff(existing()).affectedKeys().hasOnly(['seenBy']);
+        allow delete: if isSignedIn() && request.auth.uid == existing().senderId;
+      }
     }
 
     match /users/{userId} {

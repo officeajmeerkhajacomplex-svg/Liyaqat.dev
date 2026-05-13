@@ -131,12 +131,6 @@ export default function CollectionDetailPage() {
         </div>
         <h2 className="text-3xl font-bold dark:text-white font-serif mb-2">{item.title}</h2>
         <div className="flex items-center gap-3">
-          {item.isPro && (
-            <div className="px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-full text-xs font-bold flex items-center gap-1 border border-amber-200 dark:border-amber-900/50">
-              <Sparkles className="w-3 h-3" />
-              PRO PRESET
-            </div>
-          )}
           <span className="px-3 py-1 bg-slate-100 dark:bg-zinc-800/50 text-slate-500 rounded-full text-xs font-bold uppercase tracking-widest">{item.category}</span>
           <div className="flex items-center gap-1 text-slate-400">
             <Heart className="w-4 h-4 fill-brand-emerald text-brand-emerald opacity-20" />

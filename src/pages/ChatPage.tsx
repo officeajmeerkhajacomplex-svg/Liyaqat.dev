@@ -240,10 +240,6 @@ export default function ChatPage() {
             <div>
               <h2 className="font-bold dark:text-white flex items-center gap-2">
                 DeenFlow AI
-                <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-100 dark:bg-emerald-950/50 text-[10px] text-brand-emerald rounded-full">
-                  <Sparkles className="w-2 h-2" />
-                  PRO
-                </div>
               </h2>
               <p className="text-[10px] text-slate-500 font-medium">Spiritual Companion</p>
             </div>

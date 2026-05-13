@@ -11,7 +11,8 @@ import {
   Sun,
   Library,
   MapPin,
-  List
+  List,
+  MessageCircle
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
@@ -20,6 +21,7 @@ import { playSound } from '../lib/sounds';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Home' },
+  { path: '/messages', icon: MessageCircle, label: 'Messages' },
   { path: '/chat', icon: MessageSquare, label: 'Ask AI' },
   { path: '/qibla', icon: Compass, label: 'Qibla' },
   { path: '/tasbeeh', icon: List, label: 'Tasbeeh' },
@@ -121,7 +123,8 @@ export default function MainLayout() {
             transition={{ duration: 0.2 }}
             className={cn(
               "p-4 md:p-8 w-full mx-auto",
-              location.pathname === '/masjids' ? "max-w-none h-full" : location.pathname.startsWith('/chat') ? "max-w-none h-[calc(100vh-160px)] md:h-full" : "max-w-5xl"
+              location.pathname === '/masjids' ? "max-w-none h-full" : 
+              (location.pathname.startsWith('/chat') || location.pathname.startsWith('/messages')) ? "max-w-none h-[calc(100vh-160px)] md:h-full p-0 md:p-0" : "max-w-5xl"
             )}
           >
             <Outlet />
@@ -130,7 +133,7 @@ export default function MainLayout() {
       </main>
 
       {/* Bottom Navigation - Mobile */}
-      <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-md bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-full px-4 py-3 flex items-center justify-between shadow-2xl z-[50] border border-slate-200/50 dark:border-zinc-800/50">
+      <nav className="md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 w-[95%] max-w-md bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl rounded-[2rem] px-2 py-2 flex items-center justify-start overflow-x-auto no-scrollbar shadow-2xl z-[50] border border-slate-200/50 dark:border-zinc-800/50 gap-2">
         {navItems.map((item) => {
           const isActive = location.pathname.startsWith(item.path);
           return (
@@ -139,7 +142,7 @@ export default function MainLayout() {
               to={item.path}
               onClick={handleNavClick}
               className={cn(
-                "relative flex flex-col items-center p-2 rounded-full transition-all",
+                "relative flex-shrink-0 flex flex-col items-center p-2 rounded-full transition-all min-w-[50px]",
                 isActive ? "bg-brand-emerald/10" : "hover:bg-slate-100 dark:hover:bg-zinc-800/50"
               )}
             >
