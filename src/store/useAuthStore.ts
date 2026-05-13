@@ -11,6 +11,7 @@ interface UserProfile {
   uid: string;
   email: string;
   displayName: string | null;
+  username?: string;
   photoURL: string | null;
   avatarIcon?: string;
   avatarColor?: string;
@@ -39,10 +40,12 @@ export const useAuthStore = create<AuthState>((set) => ({
       if (user) {
         const userDoc = await getDoc(doc(db, 'users', user.uid));
         if (!userDoc.exists()) {
+          const defaultUsername = user.email?.split('@')[0] || 'seeker' + Math.floor(Math.random() * 1000);
           const newProfile = {
             uid: user.uid,
             email: user.email!,
             displayName: user.displayName || 'Seeker',
+            username: defaultUsername,
             photoURL: user.photoURL,
             avatarIcon: 'User',
             avatarColor: '#10B981',
@@ -54,12 +57,13 @@ export const useAuthStore = create<AuthState>((set) => ({
           set({ user, profile: newProfile as any, loading: false, initialized: true });
         } else {
           const profileData = userDoc.data() as UserProfile;
-          if (!profileData.avatarIcon || !profileData.avatarColor || profileData.notificationsEnabled === undefined) {
-            const updates = {
+          if (!profileData.avatarIcon || !profileData.avatarColor || profileData.notificationsEnabled === undefined || !profileData.username) {
+            const updates: any = {
               avatarIcon: profileData.avatarIcon || 'User',
               avatarColor: profileData.avatarColor || '#10B981',
               notificationsEnabled: profileData.notificationsEnabled ?? true,
               bio: profileData.bio ?? '',
+              username: profileData.username || profileData.email.split('@')[0] || 'seeker' + Math.floor(Math.random() * 1000),
             };
             await updateDoc(doc(db, 'users', user.uid), updates);
             set({ user, profile: { ...profileData, ...updates }, loading: false, initialized: true });

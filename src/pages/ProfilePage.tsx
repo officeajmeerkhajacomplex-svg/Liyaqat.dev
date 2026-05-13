@@ -28,7 +28,7 @@ import {
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
 import { cn } from '../lib/utils';
-import { collection, query, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, getDocs, doc, updateDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { db, auth } from '../firebase/config';
 import { updateProfile as firebaseUpdateProfile } from 'firebase/auth';
 import { playSound } from '../lib/sounds';
@@ -107,7 +107,10 @@ export default function ProfilePage() {
     setSavingName(true);
     try {
       const updates: any = {};
-      if (isEditingName) updates.displayName = newName;
+      if (isEditingName) {
+        updates.displayName = newName;
+        updates.username = newName.toLowerCase().replace(/\s+/g, '_');
+      }
       if (isEditingBio) updates.bio = newBio;
 
       if (isEditingName && auth.currentUser) {
@@ -115,6 +118,21 @@ export default function ProfilePage() {
       }
 
       await updateDoc(doc(db, 'users', profile.uid), updates);
+      
+      // Also update public profile if it exists
+      try {
+        const publicProfileRef = doc(db, 'public_profiles', profile.uid);
+        const publicProfileSnap = await getDoc(publicProfileRef);
+        if (publicProfileSnap.exists()) {
+          const publicUpdates: any = { updatedAt: serverTimestamp() };
+          if (updates.displayName) publicUpdates.displayName = updates.displayName;
+          if (updates.username) publicUpdates.username = updates.username;
+          await updateDoc(publicProfileRef, publicUpdates);
+        }
+      } catch (e) {
+        console.error("Failed to update public profile:", e);
+      }
+
       setProfile({ ...profile, ...updates });
       setIsEditingName(false);
       setIsEditingBio(false);
@@ -189,12 +207,13 @@ export default function ProfilePage() {
           
           <div className="flex flex-col items-center gap-2 w-full max-w-sm">
             {isEditingName ? (
-              <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-800/50 p-1 pl-4 rounded-2xl border border-slate-200 dark:border-zinc-700 w-full">
+              <div className="flex items-center gap-2 bg-slate-50 dark:bg-zinc-800/50 p-1 pl-4 rounded-2xl border border-slate-200 dark:border-zinc-700 w-full mb-2">
                 <input 
                   type="text"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   autoFocus
+                  placeholder="Display Name"
                   className="bg-transparent border-none focus:ring-0 text-xl font-bold dark:text-white w-full"
                   onKeyDown={(e) => e.key === 'Enter' && handleUpdateName()}
                 />
@@ -208,12 +227,14 @@ export default function ProfilePage() {
               </div>
             ) : (
               <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-bold dark:text-white tracking-tight">{profile?.displayName || 'Seeker'}</h1>
+                <h1 className="text-3xl md:text-4xl font-bold dark:text-white tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+                  {profile?.displayName || 'Seeker'}
+                </h1>
                 <button 
                   onClick={() => setIsEditingName(true)}
                   className="p-2 text-slate-400 hover:text-brand-emerald hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-xl transition-colors"
                 >
-                  <Edit2 className="w-5 h-5" />
+                  <Edit2 className="w-4 h-4" />
                 </button>
               </div>
             )}

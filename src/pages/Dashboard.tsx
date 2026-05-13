@@ -21,10 +21,12 @@ import {
   Calendar
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
+import { usePrayerStore } from '../store/usePrayerStore';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { format, differenceInSeconds, parse, isAfter, addDays } from 'date-fns';
+import { format } from 'date-fns';
 import UpcomingIslamicDaysWidget from '../components/UpcomingIslamicDaysWidget';
+import { PrayerCountdownCard } from '../components/PrayerCountdownCard';
 
 const AVATAR_ICONS = {
   User, Star, Heart, Compass, Flower, Zap, Cloud, Music, Moon, Sun
@@ -34,11 +36,8 @@ export default function Dashboard() {
   const { profile } = useAuthStore();
   const navigate = useNavigate();
   const [verse, setVerse] = useState<any>(null);
-  const [prayerTimes, setPrayerTimes] = useState<any>(null);
-  const [hijriDate, setHijriDate] = useState<string>('');
   const [loadingVerse, setLoadingVerse] = useState(true);
-  const [nextPrayer, setNextPrayer] = useState<any>(null);
-  const [currentPrayer, setCurrentPrayer] = useState<string>('');
+  const { hijriDate } = usePrayerStore();
 
   const IconComponent = (AVATAR_ICONS as any)[profile?.avatarIcon || 'User'] || User;
 
@@ -62,72 +61,8 @@ export default function Dashboard() {
       }
     };
 
-    const fetchPrayerTimes = async (lat: number, lon: number) => {
-      try {
-        const res = await fetch(`https://api.aladhan.com/v1/timings?latitude=${lat}&longitude=${lon}&method=2`);
-        const data = await res.json();
-        setPrayerTimes(data.data.timings);
-        const hijri = data.data.date.hijri;
-        setHijriDate(`${hijri.day} ${hijri.month.en} ${hijri.year}`);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => fetchPrayerTimes(pos.coords.latitude, pos.coords.longitude),
-        () => fetchPrayerTimes(22.5726, 88.3639)
-      );
-    } else {
-      fetchPrayerTimes(22.5726, 88.3639);
-    }
-
     fetchVerse();
   }, []);
-
-  useEffect(() => {
-    if (!prayerTimes) return;
-
-    const timer = setInterval(() => {
-      const now = new Date();
-      const prayerOrder = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-      
-      let current = 'Isha';
-      let next: any = null;
-
-      const prayerDates = prayerOrder.map(name => ({
-        name,
-        date: parse(prayerTimes[name], 'HH:mm', now)
-      }));
-
-      for (let i = 0; i < prayerDates.length; i++) {
-        if (isAfter(now, prayerDates[i].date)) {
-          current = prayerDates[i].name;
-        } else {
-          next = prayerDates[i];
-          break;
-        }
-      }
-
-      if (!next) {
-        next = { name: 'Fajr', date: addDays(prayerDates[0].date, 1) };
-      }
-
-      const diff = differenceInSeconds(next.date, now);
-      const h = Math.floor(diff / 3600).toString().padStart(2, '0');
-      const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
-      const s = (diff % 60).toString().padStart(2, '0');
-
-      setCurrentPrayer(current);
-      setNextPrayer({
-        name: next.name,
-        countdown: `${h}:${m}:${s}`
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [prayerTimes]);
 
 
   return (
@@ -146,12 +81,12 @@ export default function Dashboard() {
                 <Heart size={10} className="fill-current" />
               </div>
            </Link>
-           <div>
+            <div>
               <h1 className="text-3xl font-bold dark:text-white leading-tight">
-                As-salamu alaykum, <span className="text-brand-emerald">{profile?.displayName?.split(' ')[0] || 'Seeker'}</span>
+                As-salamu alaykum, <span className="text-brand-emerald">{profile?.displayName || 'Seeker'}</span>
               </h1>
-              <p className="text-slate-500 dark:text-slate-400 font-medium">May your day be filled with barakah.</p>
-           </div>
+              <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">May your day be filled with barakah.</p>
+            </div>
         </div>
         <div className="flex items-center gap-3 self-start md:self-center">
           <div className="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-zinc-800 rounded-2xl border border-slate-200 dark:border-zinc-700 shadow-sm">
@@ -167,6 +102,9 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Column */}
         <div className="lg:col-span-2 space-y-8">
+          {/* Prayer Card */}
+          <PrayerCountdownCard onSettingsClick={() => navigate('/prayer-times')} />
+
           {/* Verse of the Day Card */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -234,49 +172,6 @@ export default function Dashboard() {
 
         {/* Sidebar Column */}
         <div className="space-y-8">
-          {/* Prayer Times Widget */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="p-6 bg-white dark:bg-zinc-800 rounded-[2rem] border border-slate-200 dark:border-zinc-700 shadow-sm"
-          >
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-lg dark:text-white">Prayer Times</h3>
-              <div className="px-3 py-1 bg-emerald-50 dark:bg-emerald-950/30 text-brand-emerald text-xs font-bold rounded-full">
-                Nearby
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].map((name) => {
-                const time = prayerTimes?.[name];
-                const isCurrent = currentPrayer === name;
-                return (
-                  <div 
-                    key={name} 
-                    className={cn(
-                      "flex items-center justify-between p-4 rounded-2xl transition-colors",
-                      isCurrent ? "bg-brand-emerald text-white" : "bg-slate-50 dark:bg-zinc-900 text-slate-600 dark:text-slate-400"
-                    )}
-                  >
-                    <span className={cn("font-semibold", isCurrent ? "text-white" : "text-slate-900 dark:text-white")}>{name}</span>
-                    <span className="font-bold tabular-nums">
-                      {time ? format(parse(time, 'HH:mm', new Date()), 'h:mm a') : '--:--'}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="mt-8 p-4 bg-brand-gold/10 dark:bg-brand-gold/5 rounded-2xl border border-brand-gold/20 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-bold text-brand-gold uppercase tracking-wider mb-1">Next: {nextPrayer?.name || '...'}</p>
-                <p className="text-xl font-bold dark:text-white tabular-nums">{nextPrayer?.countdown || '--:--:--'}</p>
-              </div>
-              <Heart className="w-8 h-8 text-brand-gold fill-current opacity-20" />
-            </div>
-          </motion.div>
-          
           {/* Upcoming Islamic Days Widget */}
           <UpcomingIslamicDaysWidget />
           

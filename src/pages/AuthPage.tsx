@@ -81,7 +81,12 @@ export default function AuthPage() {
           uid: user.uid,
           email: user.email!,
           displayName: name || user.displayName || 'Seeker',
+          username: name.toLowerCase().replace(/\s+/g, '_') || user.email?.split('@')[0] || 'seeker',
           photoURL: user.photoURL,
+          avatarIcon: 'User',
+          avatarColor: '#10B981',
+          notificationsEnabled: true,
+          bio: '',
           createdAt: serverTimestamp(),
         };
         await setDoc(doc(db, 'users', user.uid), newProfile);
@@ -188,7 +193,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Choose Username</label>
+                <label className="block text-sm font-semibold mb-2 ml-1 text-slate-700 dark:text-slate-300">Display Name</label>
                 <div className="relative">
                   <input
                     type="text"

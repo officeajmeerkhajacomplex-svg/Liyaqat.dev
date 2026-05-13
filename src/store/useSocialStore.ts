@@ -31,9 +31,10 @@ function handleFirestoreError(error: any, operationType: string, path: string) {
 export interface PublicProfile {
   uid: string;
   displayName: string;
+  username: string;
   photoURL: string;
   publicKey: string;
-  updatedAt: string;
+  updatedAt: any;
   isOnline?: boolean;
   lastSeen?: any;
   typingTo?: string | null;
@@ -130,12 +131,13 @@ export const useSocialStore = create<SocialState>((set, get) => ({
       const profileData = {
         uid: user.uid,
         displayName: user.displayName || 'Anonymous User',
+        username: user.email?.split('@')[0] || 'seeker' + Math.floor(Math.random() * 1000),
         photoURL: user.photoURL || '',
         publicKey: pubKey,
         updatedAt: serverTimestamp()
       };
       await setDoc(profileRef, profileData);
-      set({ publicProfile: profileData as PublicProfile, privateKeyPem: privKey });
+      set({ publicProfile: profileData as any, privateKeyPem: privKey });
     } else {
       set({ publicProfile: profileSnap.data() as PublicProfile, privateKeyPem: privKey });
     }
@@ -348,7 +350,7 @@ export const useSocialStore = create<SocialState>((set, get) => ({
       senderId: user.uid,
       encryptedMessage: encryptedMessageString,
       encryptedKeys,
-      iv: arrayBufferToBase64(iv.buffer),
+      iv: arrayBufferToBase64(iv.buffer as ArrayBuffer),
       messageType: 'text',
       timestamp: serverTimestamp(),
       seenBy: [user.uid]

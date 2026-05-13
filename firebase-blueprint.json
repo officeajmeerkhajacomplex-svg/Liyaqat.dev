@@ -8,6 +8,7 @@
         "uid": { "type": "string" },
         "email": { "type": "string", "format": "email" },
         "displayName": { "type": "string" },
+        "username": { "type": "string" },
         "photoURL": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" },
         "lastLast": { "type": "string", "format": "date-time" }
@@ -75,11 +76,12 @@
       "properties": {
         "uid": { "type": "string" },
         "displayName": { "type": "string" },
+        "username": { "type": "string" },
         "photoURL": { "type": "string" },
         "publicKey": { "type": "string" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
-      "required": ["uid", "displayName", "publicKey"]
+      "required": ["uid", "displayName", "username", "publicKey"]
     },
     "SocialChat": {
       "title": "Social Chat",

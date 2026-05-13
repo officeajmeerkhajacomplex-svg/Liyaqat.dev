@@ -69,10 +69,18 @@ service cloud.firestore {
              data.timestamp == request.time;
     }
 
+    function isValidPrayerSettings(data) {
+      return data.keys().hasAll(['fajr', 'dhuhr', 'asr', 'maghrib', 'isha', 'adhanVoice', 'calculationMethod']) &&
+             data.fajr is bool &&
+             data.adhanVoice is string && data.adhanVoice.size() <= 50 &&
+             data.calculationMethod is number;
+    }
+
     function isValidPublicProfile(data) {
-      return data.keys().hasAll(['uid', 'displayName', 'publicKey']) &&
+      return data.keys().hasAll(['uid', 'displayName', 'username', 'publicKey']) &&
              data.uid == request.auth.uid &&
              data.displayName is string && data.displayName.size() <= 100 &&
+             data.username is string && data.username.size() <= 100 &&
              data.publicKey is string && data.publicKey.size() <= 5000 &&
              (data.get('photoURL', null) == null || data.photoURL is string) &&
              (data.get('updatedAt', null) == null || data.updatedAt == request.time) &&
@@ -123,7 +131,7 @@ service cloud.firestore {
       allow create: if isOwner(userId) && isValidPublicProfile(incoming());
       allow update: if isOwner(userId) && 
                       incoming().uid == existing().uid &&
-                      incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'publicKey', 'updatedAt', 'isOnline', 'lastSeen', 'typingTo', 'fcmToken']);
+                      incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'username', 'photoURL', 'publicKey', 'updatedAt', 'isOnline', 'lastSeen', 'typingTo', 'fcmToken']);
     }
 
     match /social_chats/{chatId} {
@@ -180,6 +188,11 @@ service cloud.firestore {
         allow list: if isOwner(userId);
         allow create: if isOwner(userId) && isValidTasbeeh(incoming());
         allow delete: if isOwner(userId);
+      }
+
+      match /prayer_settings/{settingId} {
+        allow get: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidPrayerSettings(incoming());
       }
     }
   }

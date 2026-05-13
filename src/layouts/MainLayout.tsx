@@ -17,7 +17,9 @@ import {
 import { cn } from '../lib/utils';
 import { motion, AnimatePresence } from 'motion/react';
 import { useThemeStore } from '../store/useThemeStore';
+import { usePrayerStore } from '../store/usePrayerStore';
 import { playSound } from '../lib/sounds';
+import { useEffect } from 'react';
 
 const navItems = [
   { path: '/dashboard', icon: LayoutDashboard, label: 'Home' },
@@ -34,6 +36,11 @@ const navItems = [
 export default function MainLayout() {
   const location = useLocation();
   const { theme, toggleTheme } = useThemeStore();
+  const { initialize: initPrayers } = usePrayerStore();
+
+  useEffect(() => {
+    initPrayers();
+  }, [initPrayers]);
 
   const handleNavClick = () => {
     playSound('tap');
