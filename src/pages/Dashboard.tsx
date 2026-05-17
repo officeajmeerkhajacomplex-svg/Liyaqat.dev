@@ -146,13 +146,6 @@ export default function Dashboard() {
           {/* Featured Sections Grid - Now below Verse */}
           <div className="grid grid-cols-2 gap-3 md:gap-6">
             <ActionCard 
-              to="/collections"
-              icon={Library}
-              title="Library"
-              desc="Collections"
-              color="emerald"
-            />
-            <ActionCard 
               to="/chat"
               icon={MessageSquare}
               title="Deen AI"
@@ -193,7 +186,6 @@ export default function Dashboard() {
               title="Social"
               desc="Spiritual Circle"
               color="emerald"
-              className="col-span-2"
             />
           </div>
 

@@ -23,7 +23,11 @@ import {
   Cloud,
   Music,
   Camera,
-  Quote
+  Quote,
+  Info,
+  Code,
+  Instagram,
+  Globe
 } from 'lucide-react';
 import { useAuthStore } from '../store/useAuthStore';
 import { useThemeStore } from '../store/useThemeStore';
@@ -60,6 +64,15 @@ export default function ProfilePage() {
   const [newBio, setNewBio] = useState('');
   const [savingName, setSavingName] = useState(false);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showAboutModal, setShowAboutModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+
+  const handleExternalLink = (url: string) => {
+    if (window.confirm("Do you want to open this link in your browser?")) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
 
   useEffect(() => {
     if (profile?.displayName) {
@@ -387,8 +400,16 @@ export default function ProfilePage() {
               )} />
             </div>
           </button>
+        </div>
 
-          <SettingItem icon={Shield} label="Privacy Policy" />
+        <div className="p-3 md:p-4 bg-slate-50 dark:bg-zinc-800/50 border-y border-slate-100 dark:border-zinc-800 mt-2 md:mt-4">
+           <h3 className="text-[9px] md:text-xs font-bold text-slate-400 uppercase tracking-widest px-3 md:px-4">About & Support</h3>
+        </div>
+        
+        <div className="divide-y divide-slate-100 dark:divide-zinc-800">
+          <SettingItem icon={Info} label="About the App" onClick={() => setShowAboutModal(true)} />
+          <SettingItem icon={Code} label="Developer Support" onClick={() => setShowSupportModal(true)} />
+          <SettingItem icon={Shield} label="Privacy Policy" onClick={() => setShowPrivacyModal(true)} />
         </div>
       </div>
 
@@ -404,13 +425,118 @@ export default function ProfilePage() {
       <div className="text-center pt-4">
         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">DeenFlow Version 1.0.0 (Beta)</p>
       </div>
+
+      {/* Modals */}
+      <AnimatePresence>
+        {showPrivacyModal && (
+          <Modal onClose={() => setShowPrivacyModal(false)} title="Privacy Policy">
+            <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
+              <p><strong>1. Introduction</strong><br/>Welcome to DeenFlow. Your privacy and trust are extremely important to us.</p>
+              <p><strong>2. Information Collection</strong><br/>We collect basic account information (name, email) and app usage data to personalize your experience and sync your preferences securely.</p>
+              <p><strong>3. Use of Google Services</strong><br/>When you authenticate using Google, we only access your email, name, and profile picture to create your DeenFlow account.</p>
+              <p><strong>4. Data Security</strong><br/>Your data is securely stored using enterprise-grade completely secure databases. We never sell your personal information.</p>
+              <p><strong>5. Contact Us</strong><br/>For any privacy-related queries, please explore the Developer Support section.</p>
+            </div>
+          </Modal>
+        )}
+
+        {showAboutModal && (
+          <Modal onClose={() => setShowAboutModal(false)} title="About DeenFlow">
+            <div className="space-y-4 text-slate-600 dark:text-slate-300 text-sm leading-relaxed text-center">
+              <div className="flex justify-center mb-6">
+                <img src="/favicon.svg" className="w-16 h-16" alt="DeenFlow" />
+              </div>
+              <p><strong>DeenFlow</strong> is a modern spiritual companion designed to help you connect deeper with your Deen through AI-guided reminders, Quranic insights, and beautifully crafted tools.</p>
+              <p>Built with minimal aesthetics and focus in mind, DeenFlow aims to bring peace and tranquility to your daily spiritual routines.</p>
+            </div>
+          </Modal>
+        )}
+
+        {showSupportModal && (
+          <Modal onClose={() => setShowSupportModal(false)} title="Developer Support">
+             <div className="space-y-6">
+               <div className="text-center">
+                 <div className="w-20 h-20 bg-brand-emerald/10 text-brand-emerald rounded-full flex flex-col items-center justify-center mx-auto mb-4 border-2 border-brand-emerald/20 shadow-lg shadow-emerald-500/10">
+                   <Code size={32} />
+                 </div>
+                 <h3 className="text-xl font-bold dark:text-white mb-1">Liyaqat</h3>
+                 <p className="text-xs text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">Lead Developer & Designer</p>
+               </div>
+               
+               <div className="grid grid-cols-1 gap-3">
+                 <button 
+                   onClick={() => handleExternalLink('https://www.instagram.com/l.yaqat_')}
+                   className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 rounded-2xl hover:border-pink-300 dark:hover:border-pink-900/50 transition-all group"
+                 >
+                   <div className="flex items-center gap-4">
+                     <div className="p-2.5 bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 text-white rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                       <Instagram size={20} />
+                     </div>
+                     <span className="font-bold dark:text-white text-left text-sm leading-tight">
+                       Follow on Instagram<br/>
+                       <span className="text-xs text-slate-500 font-medium">@l.yaqat_</span>
+                     </span>
+                   </div>
+                   <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-pink-500 transition-colors" />
+                 </button>
+
+                 <button 
+                   onClick={() => handleExternalLink('https://liyaqat-dev.github.io')}
+                   className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-800 border border-slate-100 dark:border-zinc-700 rounded-2xl hover:border-blue-300 dark:hover:border-blue-900/50 transition-all group"
+                 >
+                   <div className="flex items-center gap-4">
+                     <div className="p-2.5 bg-blue-500 text-white rounded-xl shadow-md group-hover:scale-110 transition-transform">
+                       <Globe size={20} />
+                     </div>
+                     <span className="font-bold dark:text-white text-left text-sm leading-tight">
+                       Visit Website<br/>
+                       <span className="text-xs text-slate-500 font-medium">liyaqat-dev.github.io</span>
+                     </span>
+                   </div>
+                   <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-blue-500 transition-colors" />
+                 </button>
+               </div>
+             </div>
+          </Modal>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
 
-function SettingItem({ icon: Icon, label }: any) {
+function Modal({ onClose, title, children }: any) {
   return (
-    <button className="w-full flex items-center justify-between p-6 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <motion.div 
+        initial={{ opacity: 0 }} 
+        animate={{ opacity: 1 }} 
+        exit={{ opacity: 0 }} 
+        onClick={onClose}
+        className="absolute inset-0 bg-slate-900/40 dark:bg-black/60 backdrop-blur-sm" 
+      />
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 20 }} 
+        animate={{ opacity: 1, scale: 1, y: 0 }} 
+        exit={{ opacity: 0, scale: 0.95, y: 20 }} 
+        className="relative w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2rem] overflow-hidden shadow-2xl border border-slate-200 dark:border-zinc-800"
+      >
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-zinc-800 flex items-center justify-between bg-slate-50/50 dark:bg-zinc-900/50">
+          <h3 className="font-bold text-lg dark:text-white">{title}</h3>
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white bg-white dark:bg-zinc-800 rounded-full transition-colors shadow-sm">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+        <div className="p-6">
+          {children}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function SettingItem({ icon: Icon, label, onClick }: any) {
+  return (
+    <button onClick={onClick} className="w-full flex items-center justify-between p-4 md:p-6 hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
       <div className="flex items-center gap-4 text-slate-700 dark:text-slate-200">
         <div className={cn("p-2 rounded-xl bg-slate-100 dark:bg-zinc-800")}>
           <Icon className="w-5 h-5" />
